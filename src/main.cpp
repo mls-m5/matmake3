@@ -10,7 +10,10 @@ int main(int argc, char *argv[]) {
 
     writeNinjaFile(index);
 
-    std::system("ninja");
+    auto cachePath = "build/.mm3/default";
 
-    return 0;
+    return std::system(
+        ("ninja -f " +
+         (std::filesystem::path{cachePath} / "build.ninja").string())
+            .c_str());
 }

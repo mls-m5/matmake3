@@ -14,7 +14,9 @@ void printEscaped(std::ostream &stream, std::string_view str) {
 }
 
 void writeNinjaFile(const Index &index) {
-    auto file = std::ofstream{"build.ninja"};
+    auto cachePath = "build/.mm3/default";
+    auto outPath = "build/default";
+    auto file = std::ofstream{std::filesystem::path{cachePath} / "build.ninja"};
 
     std::cout << "printing build.ninja" << std::endl;
 
@@ -39,9 +41,6 @@ void writeNinjaFile(const Index &index) {
         file << "    " << name << " = " << value << "\n";
     };
 
-    auto cachePath = "build/.mm3/default";
-    auto outPath = "build/default";
-
     auto srcToObj = [&cachePath](std::filesystem::path path) {
         path.replace_extension(".o");
         return cachePath / path;
@@ -54,6 +53,7 @@ void writeNinjaFile(const Index &index) {
             file << "build " << opath.string() << ": cxx " << src.path.string()
                  << "\n";
             set("cxx", "g++");
+            file << "\n";
         }
     }
 
@@ -63,8 +63,12 @@ void writeNinjaFile(const Index &index) {
     file << "build " << (outPath / parentPath).string() << ": exe ";
 
     for (auto &src : index.files) {
+        if (!src.isSource()) {
+            continue;
+        }
         auto opath = srcToObj(src.path);
         printEscaped(file, opath.string());
+        file << " ";
     }
 
     file << "\n";
