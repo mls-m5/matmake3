@@ -5,6 +5,8 @@ project(matmake3)
 add_executable(
     matmake3
     src/main.cpp
+    src/ninja.cpp
+    src/filter.cpp
     )
 
 target_compile_features(

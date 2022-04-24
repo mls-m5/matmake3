@@ -1,5 +1,6 @@
+#include "index.h"
+#include "ninja.h"
 #include <filesystem>
-#include <index.h>
 #include <iostream>
 
 int main(int argc, char *argv[]) {
@@ -7,11 +8,9 @@ int main(int argc, char *argv[]) {
 
     auto index = Index{};
 
-    std::cout << std::filesystem::current_path() << std::endl;
+    writeNinjaFile(index);
 
-    for (auto &file : index.files) {
-        std::cout << file.path << "\n";
-    }
+    std::system("ninja");
 
     return 0;
 }
