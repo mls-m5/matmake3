@@ -13,21 +13,16 @@ extern "C" {
 //#include <lualib.h>
 #include "ninja.h"
 
-// executables = {
-//     main = {
-//         src = std.glob("src/**.cpp")
-//     }
-// }
-
-// print(executables['main']['src'][0])
 auto standardCode =
     R"_(
---test = {}
---test[0] = "hello"
---test[1] = "there"
---test["x"] = "there"
 
---test = {"hello", "there", "you"}
+--executables = {
+--    main = {
+--        src = std.glob("src/**.cpp")
+--    }
+--}
+
+executables = glob("src/*.cpp");
 test = glob();
 )_";
 
@@ -35,6 +30,14 @@ auto fileIndex = std::shared_ptr<Index>{};
 
 extern "C" {
 int glob(lua_State *L) {
+    //    auto str = luaL_checkstring(L, 1);
+    if (lua_isstring(L, 1)) {
+        std::cout << "has arguments " << lua_tostring(L, 1) << "\n";
+    }
+    else {
+        std::cout << "does not have arguments\n";
+    }
+
     lua_newtable(L);
 
     int index = 1;
@@ -49,6 +52,7 @@ int glob(lua_State *L) {
 
         ++index;
     }
+
     return 1;
 }
 }
@@ -64,7 +68,6 @@ std::vector<std::filesystem::path> getLuaTablePaths(lua_State *L) {
             break;
         }
 
-        //        std::cout << lua_tostring(L, -1) << std::endl;
         paths.push_back(lua_tostring(L, -1));
         lua_pop(L, 1);
     }
@@ -86,11 +89,11 @@ void runLua() {
 
     auto paths = getLuaTablePaths(L);
 
+    lua_pop(L, 1);
+
     for (auto &path : paths) {
         std::cout << path << "\n";
     }
-
-    lua_pop(L, 1);
 }
 
 int main(int argc, char *argv[]) {
