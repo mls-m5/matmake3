@@ -47,6 +47,25 @@ int glob(lua_State *L) {
 }
 }
 
+std::vector<std::filesystem::path> getLuaTablePaths(lua_State *L) {
+    auto paths = std::vector<std::filesystem::path>{};
+
+    for (int i = 0;; ++i) {
+        lua_pushnumber(L, i + 1);
+        lua_gettable(L, -2);
+
+        if (lua_isnil(L, -1)) {
+            break;
+        }
+
+        //        std::cout << lua_tostring(L, -1) << std::endl;
+        paths.push_back(lua_tostring(L, -1));
+        lua_pop(L, 1);
+    }
+
+    return paths;
+}
+
 void runLua() {
     auto L = luaL_newstate();
 
@@ -59,16 +78,10 @@ void runLua() {
 
     lua_getglobal(L, "test");
 
-    for (int i = 0;; ++i) {
-        lua_pushnumber(L, i + 1);
-        lua_gettable(L, -2);
+    auto paths = getLuaTablePaths(L);
 
-        if (lua_isnil(L, -1)) {
-            break;
-        }
-
-        std::cout << lua_tostring(L, -1) << std::endl;
-        lua_pop(L, 1);
+    for (auto &path : paths) {
+        std::cout << path << "\n";
     }
 
     lua_pop(L, 1);
