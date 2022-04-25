@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.23)
 project(matmake3)
 
-file(
-    GLOB LUA_SRC
+add_library(
+    lua
+    SHARED
     lua/lapi.c
     lua/lcode.c
     lua/lctype.c
@@ -35,50 +36,12 @@ file(
     lua/ltablib.c
     lua/lutf8lib.c
     lua/linit.c
-    )
-
-file(
-    GLOB LUACPP_SRC
-    luacpp/Source/*.cpp
-    luacpp/Source/Engine/*.cpp
-    luacpp/Source/Registry/*.cpp
-    )
-
-message("${LUACPP_SRC}")
-
-add_library(
-    lua
-    SHARED
-    ${LUA_SRC}
+    lua/lauxlib.c
     )
 
 target_include_directories(
     lua
     PUBLIC
-    lua
-    )
-
-add_library(
-    luacpp
-    STATIC
-    ${LUACPP_SRC}
-    )
-
-target_include_directories(
-    luacpp
-    PUBLIC
-    luacpp/Source
-    )
-
-target_link_libraries(
-    luacpp
-    PUBLIC
-    lua
-    )
-
-target_compile_features(
-    luacpp
-    PUBLIC
-    cxx_std_17
+    .
     )
 

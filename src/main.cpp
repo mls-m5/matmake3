@@ -1,34 +1,45 @@
-#include "LuaCpp.hpp"
+//#include "LuaCpp.hpp"
 #include "index.h"
-#include "ninja.h"
-#include <filesystem>
-#include <iostream>
-
-using namespace std::literals;
-
-auto standardCode =
-    R"_(
-
-executables = {
-    main = {
-        src = std.glob("src/**.cpp")
-    }
-}
-
-print(executables['main']['src'][0])
-
-)_"s;
-
-auto index = std::shared_ptr<Index>{};
 
 extern "C" {
-int _glob(lua_State *L) {
+#include "lua/lauxlib.h"
+#include "lua/lua.h"
+#include "lua/lualib.h"
+}
+#include <filesystem>
+#include <iostream>
+//#include <lauxlib.h>
+//#include <lua.h>
+//#include <lualib.h>
+#include "ninja.h"
+
+// executables = {
+//     main = {
+//         src = std.glob("src/**.cpp")
+//     }
+// }
+
+// print(executables['main']['src'][0])
+auto standardCode =
+    R"_(
+--test = {}
+--test[0] = "hello"
+--test[1] = "there"
+--test["x"] = "there"
+
+test = {"hello", "there", "you"}
+)_";
+
+auto fileIndex = std::shared_ptr<Index>{};
+
+extern "C" {
+int glob(lua_State *L) {
     lua_newtable(L);
-    for (auto &file : index->files) {
+    for (auto &file : fileIndex->files) {
         if (!file.isSource()) {
             continue;
         }
-        lua_pushinteger(L, 0);
+        lua_pushinteger(L, 1);
         lua_pushstring(L, file.path.string().c_str());
         lua_settable(L, -3);
     }
@@ -36,29 +47,41 @@ int _glob(lua_State *L) {
 }
 }
 
+void runLua() {
+    auto L = luaL_newstate();
+
+    luaL_openlibs(L);
+
+    lua_pushcfunction(L, glob);
+    lua_setglobal(L, "glob");
+
+    luaL_dostring(L, standardCode);
+
+    lua_getglobal(L, "test");
+
+    for (int i = 0;; ++i) {
+        lua_pushnumber(L, i + 1);
+        lua_gettable(L, -2);
+
+        if (lua_isnil(L, -1)) {
+            break;
+        }
+
+        std::cout << lua_tostring(L, -1) << std::endl;
+        lua_pop(L, 1);
+    }
+
+    lua_pop(L, 1);
+}
+
 int main(int argc, char *argv[]) {
     std::ios::sync_with_stdio(false);
 
-    index = std::make_shared<Index>();
+    fileIndex = std::make_shared<Index>();
 
-    auto lua = LuaCpp::LuaContext{};
+    runLua();
 
-    auto lib = std::make_shared<LuaCpp::Registry::LuaLibrary>("std");
-    lib->AddCFunction("glob", _glob);
-
-    lua.AddLibrary(lib);
-
-    // The simples way is to use CompileStringAndRun method
-    try {
-        lua.CompileStringAndRun(
-            "print('The fastest way to start using lua in a project')");
-        lua.CompileStringAndRun(standardCode);
-    }
-    catch (std::runtime_error &e) {
-        std::cout << e.what() << '\n';
-    }
-
-    writeNinjaFile(*index);
+    writeNinjaFile(*fileIndex);
 
     auto cachePath = "build/.mm3/default";
 

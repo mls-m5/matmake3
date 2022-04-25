@@ -19,8 +19,8 @@ target_compile_features(
 
 target_link_libraries(
     matmake3
-    PRIVATE
-    luacpp
+    PUBLIC
+    lua
     )
 
 file (
