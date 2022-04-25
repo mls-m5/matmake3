@@ -16,6 +16,8 @@ void printEscaped(std::ostream &stream, std::string_view str) {
 void writeNinjaFile(const Index &index) {
     auto cachePath = "build/.mm3/default";
     auto outPath = "build/default";
+
+    std::filesystem::create_directories(cachePath);
     auto file = std::ofstream{std::filesystem::path{cachePath} / "build.ninja"};
 
     std::cout << "printing build.ninja" << std::endl;
