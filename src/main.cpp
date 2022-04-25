@@ -27,7 +27,8 @@ auto standardCode =
 --test[1] = "there"
 --test["x"] = "there"
 
-test = {"hello", "there", "you"}
+--test = {"hello", "there", "you"}
+test = glob();
 )_";
 
 auto fileIndex = std::shared_ptr<Index>{};
@@ -35,13 +36,18 @@ auto fileIndex = std::shared_ptr<Index>{};
 extern "C" {
 int glob(lua_State *L) {
     lua_newtable(L);
+
+    int index = 1;
+
     for (auto &file : fileIndex->files) {
         if (!file.isSource()) {
             continue;
         }
-        lua_pushinteger(L, 1);
+        lua_pushinteger(L, index);
         lua_pushstring(L, file.path.string().c_str());
         lua_settable(L, -3);
+
+        ++index;
     }
     return 1;
 }
