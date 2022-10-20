@@ -4,6 +4,7 @@
 #include "filter.h"
 #include "nlohmann/json.hpp"
 #include <memory>
+#include <unordered_set>
 #include <vector>
 
 struct Index {

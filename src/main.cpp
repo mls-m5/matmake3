@@ -1,3 +1,4 @@
+#include "build.h"
 #include "createrecursive.h"
 #include "index.h"
 #include "ninja.h"
@@ -9,12 +10,13 @@ int main(int argc, char *argv[]) {
     auto index = std::make_unique<Index>();
     auto target = createRecursive(*index);
 
-    //    writeNinjaFile(*index);
+    build(*target);
 
     auto cachePath = "build/.mm3/default";
 
-    return std::system(
-        ("ninja -f " +
-         (std::filesystem::path{cachePath} / "build.ninja").string())
-            .c_str());
+    //    writeNinjaFile(*index);
+    //    return std::system(
+    //        ("ninja -f " +
+    //         (std::filesystem::path{cachePath} / "build.ninja").string())
+    //            .c_str());
 }

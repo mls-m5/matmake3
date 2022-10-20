@@ -72,11 +72,19 @@ public:
         _output->dependencies.push_back(file);
     }
 
+    // Root node of target
+    File *output() {
+        return _output;
+    }
+
+    const Index &index() const {
+        return *_index;
+    }
+
 private:
     Index *_index;
 
     std::vector<File *> _files;
-    //    std::vector<File *> _objects;
     std::unordered_map<std::string, CreateT> _createFunctions;
     std::string _name = "main";
 

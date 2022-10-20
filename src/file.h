@@ -17,11 +17,7 @@ struct File {
     ~File() = default;
     File(std::filesystem::path p, Type type)
         : path{std::move(p)}
-        , type{type} {
-        //        if (isSourceFile(path)) {
-        //            type = Source;
-        //        }
-    }
+        , type{type} {}
 
     File(const File &) = delete;
     File(File &&) = delete;
@@ -30,6 +26,22 @@ struct File {
 
     bool isSource() const {
         return type == Source;
+    }
+
+    std::filesystem::path fullPath() {
+        auto cachePath = "build/.mm3/default";
+        auto outPath = "build/default";
+
+        switch (type) {
+        case Source:
+            return path;
+        case Intermediate:
+            return cachePath / path;
+        case Output:
+            return outPath / path;
+        default:
+            throw std::runtime_error{"invalid file " + path.string()};
+        }
     }
 
     // Where to put file if it were in the same path
@@ -42,7 +54,10 @@ struct File {
     std::filesystem::path path;
     Type type = Unknown;
     std::vector<File *> dependencies;
+    File *src = nullptr;
     Id id = uniqueId();
+    bool isBuilt = false;       // Only used for when building in application
+    std::string buildType = ""; // Override file extension
 };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(File::Type,
@@ -54,6 +69,11 @@ NLOHMANN_JSON_SERIALIZE_ENUM(File::Type,
                              })
 
 inline void to_json(nlohmann::json &j, const File *f) {
+    if (!f) {
+        j = nlohmann::json{};
+        return;
+    }
+
     if (false) {
         j = f->id;
     }
@@ -67,10 +87,20 @@ inline void to_json(nlohmann::json &j, const File &file) {
         {"path", file.path},
         {"id", file.id},
         {"deps", file.dependencies},
+        {"src", file.src},
         {"type", file.type},
+        {"buildType", file.buildType},
     };
 }
 
 inline void to_json(nlohmann::json &j, const std::unique_ptr<File> &f) {
     to_json(j, *f);
+}
+
+inline std::ostream &operator<<(std::ostream &stream,
+                                const std::vector<File *> files) {
+    for (auto &file : files) {
+        stream << " " << file->fullPath();
+    }
+    return stream;
 }

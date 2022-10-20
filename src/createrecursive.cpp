@@ -17,6 +17,8 @@ File *createRegularObjectFile(Target &target,
         file->dependencies.push_back(target.requestObject(module));
     }
 
+    file->src = &src;
+
     return file;
 }
 
@@ -27,7 +29,7 @@ File *createModuleObjectFile(Target &target,
     path = src.sameDir(path);
 
     auto file = target.createIntermediateFile(path);
-    file->dependencies.push_back(&src);
+    file->src = &src;
 
     return file;
 }
@@ -69,7 +71,7 @@ File *createPcmFile(Target &target, std::filesystem::path path) {
     path = src->sameDir(path);
 
     auto file = target.createIntermediateFile(path);
-    file->dependencies.push_back(src);
+    file->src = src;
 
     {
         auto deps = parseModuleDeps(src->path);
@@ -110,7 +112,11 @@ std::unique_ptr<Target> createRecursive(Index &index) {
         target->addObject(obj);
     }
 
-    std::cout << std::setw(2) << nlohmann::json{{"index", index},{"target",*target},} << std::endl;
+    target->output()->buildType = "exe";
+
+    std::cout << std::setw(2)
+              << nlohmann::json{{"index", index}, {"target", *target},}
+              << std::endl;
 
     return target;
 }

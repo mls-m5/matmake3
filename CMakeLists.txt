@@ -13,6 +13,7 @@ add_executable(
     src/matmakelua.cpp
     src/createrecursive.cpp
     src/deps.cpp
+    src/build.cpp
     )
 
 target_compile_features(
