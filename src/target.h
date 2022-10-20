@@ -1,6 +1,7 @@
 #pragma once
 #include "file.h"
 #include "index.h"
+#include "nlohmann/json.hpp"
 #include <functional>
 #include <unordered_map>
 
@@ -14,10 +15,6 @@ public:
 
     Target(Index &index)
         : _index{&index} {}
-
-    auto &index() {
-        return *_index;
-    }
 
     // Try to find an object, and create with the right function if it does not
     // exist
@@ -35,7 +32,6 @@ public:
                                              path.string()};
                 }
 
-                _files.push_back(file);
                 return file;
             }
         }
@@ -52,6 +48,20 @@ public:
 
     File *find(std::filesystem::path path) {
         return _index->find(path);
+    }
+
+    // Create temporary file that can be removed after compilation
+    File *createIntermediateFile(std::filesystem::path path) {
+        auto file = std::make_unique<File>(path, File::Intermediate);
+        _files.push_back(file.get());
+        _index->files.push_back(std::move(file));
+        return _index->files.back().get();
+    }
+
+    friend void to_json(nlohmann::json &j, const Target &t) {
+        j = nlohmann::json{
+            {"files", t._files},
+        };
     }
 
 private:

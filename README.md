@@ -8,3 +8,6 @@ Only used files will be included. (Unknown how libraries will be handled)
 
 Possibility to build without configuration files.
 
+
+## References
+https://clang.llvm.org/docs/StandardCPlusPlusModules.html

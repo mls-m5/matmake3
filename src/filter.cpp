@@ -18,6 +18,7 @@ bool isSourceFile(const std::filesystem::path &path) {
     auto ext = path.extension();
     static constexpr auto arr = std::array{
         ".cpp",
+        ".cppm",
     };
     for (auto a : arr) {
         if (a == ext) {

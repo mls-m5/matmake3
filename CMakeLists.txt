@@ -12,6 +12,7 @@ add_executable(
     src/glob.cpp
     src/matmakelua.cpp
     src/createrecursive.cpp
+    src/deps.cpp
     )
 
 target_compile_features(
@@ -29,4 +30,9 @@ target_link_libraries(
 file (
     COPY demos
     DESTINATION .
+    )
+
+
+include_directories(
+    lib/json/single_include/
     )

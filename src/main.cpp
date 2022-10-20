@@ -1,7 +1,6 @@
 #include "createrecursive.h"
 #include "index.h"
 #include "ninja.h"
-#include "target.h"
 #include <iostream>
 
 int main(int argc, char *argv[]) {
