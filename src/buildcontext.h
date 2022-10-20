@@ -17,7 +17,13 @@ using BuildFMap =
 struct BuildContext {
     BuildFMap map;
 
-    std::string compiler = "clang++-16 -std=c++20";
+    std::string compiler = "clang++-16";
+    std::string flags = "-std=c++20";
+    std::string linkFlags = "";
+
+    std::string common() {
+        return compiler + " " + flags;
+    }
 
     void build(File &file) {
         if (file.isSource() || (!file.src && file.dependencies.empty())) {

@@ -2,8 +2,11 @@
 #include "file.h"
 #include "index.h"
 #include "nlohmann/json.hpp"
+#include <algorithm>
+#include <filesystem>
 #include <functional>
 #include <unordered_map>
+#include <vector>
 
 // Target is a single file context, like a executable or library
 class Target {
@@ -88,10 +91,19 @@ public:
         return _index->findSystemFile(path);
     }
 
+    void includes(std::vector<std::filesystem::path> includes) {
+        _includes = std::move(includes);
+    }
+
+    const auto &includes() const {
+        return _includes;
+    }
+
 private:
     Index *_index;
 
     std::vector<File *> _files;
+    std::vector<std::filesystem::path> _includes;
     std::unordered_map<std::string, CreateT> _createFunctions;
     std::string _name = "main";
 

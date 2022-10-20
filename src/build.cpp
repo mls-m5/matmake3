@@ -2,6 +2,8 @@
 #include "buildcontext.h"
 #include "commandstream.h"
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <unordered_set>
 
 namespace {
@@ -18,45 +20,58 @@ std::string pcmDepString(File &file) {
     return depss.str();
 }
 
+std::string flags(Target &target) {
+    auto ss = std::ostringstream{};
+    for (auto i : target.includes()) {
+        ss << " -I" << i;
+    }
+    return ss.str();
+}
+
 void buildObj(BuildContext &context, File &file) {
-    (Command{} << context.compiler << " " << file.src->fullPath()
+    (Command{} << context.common() << " " << file.src->fullPath()
                << pcmDepString(file) << " -c -o " << file.fullPath())
         .run();
 }
 
 void buildExe(BuildContext &context, File &file) {
-    (Command{} << context.compiler << file.dependencies << " -o "
-               << file.fullPath())
+    (Command{} << context.common() << " " << context.linkFlags << " "
+               << file.dependencies << " -o " << file.fullPath())
         .run();
 }
 
 void buildPcm(BuildContext &context, File &file) {
-    (Command{} << context.compiler << " " << file.src->fullPath()
+    (Command{} << context.common() << " " << file.src->fullPath()
                << pcmDepString(file) << " --precompile -o " << file.fullPath())
         .run();
 }
 
 void buildHeaderPcm(BuildContext &context, File &file) {
-    (Command{} << context.compiler << " " << file.src->fullPath()
+    (Command{} << context.common() << " " << file.src->fullPath()
                << " -fmodule-header -o " << file.fullPath())
         .run();
 }
 
 BuildContext buildContext() {
-    return {{
+    auto context = BuildContext{{
         {".o", buildObj},
         {"exe", buildExe},
         {".pcm", buildPcm},
         {".h.pcm", buildHeaderPcm},
     }};
+
+    return context;
 }
 
 } // namespace
 
-void build(Target &target) {
+void build(Target &target, const Settings &settings) {
     auto out = target.output();
 
     auto context = buildContext();
+    context.flags += flags(target);
+    context.linkFlags += settings.linkFlags;
+
     createBuildPaths(target.index());
     context.build(*out);
 }

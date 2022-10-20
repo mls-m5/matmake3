@@ -1,6 +1,8 @@
 #include "createrecursive.h"
 #include "deps.h"
+#include <filesystem>
 #include <iostream>
+#include <vector>
 
 namespace {
 
@@ -130,41 +132,6 @@ File *createPcmHeaderFile(Target &target, std::filesystem::path path) {
     auto file = target.createIntermediateFile(path);
     file->buildType = ".h.pcm";
     file->src = src;
-
-    //    {
-    //        auto deps = parseModuleDeps(src->path);
-    //        for (auto &dep : deps) {
-    //            auto name = dep;
-    //            auto type = ".pcm";
-    //            if (dep.front() == '<' || dep.front() == '"') {
-    //                auto path =
-    //                    std::filesystem::path{name.substr(1, name.size() - 2)}
-    //                        .replace_extension(".pcm");
-    //                name = path.string();
-    //                type = ".h.pcm";
-    //            }
-    //            else {
-    //                name += ".pcm";
-    //            }
-    //            file->dependencies.push_back(target.requestObject(name,
-    //            type));
-    //        }
-    //    }
-
-    //    {
-    //        auto objPath = path;
-    //        objPath.replace_extension(".o");
-    //        auto objFile = target.find(objPath);
-    //        if (objFile) {
-    //            throw std::runtime_error{
-    //                objPath.string() +
-    //                " does already exist, refusing to create duplicate"};
-    //        }
-
-    //        objFile = createModuleObjectFile(target, objPath, *file);
-    //        target.addObject(objFile);
-    //    }
-
     return file;
 }
 
@@ -182,6 +149,16 @@ std::unique_ptr<Target> createRecursive(Index &index) {
         objSrc.replace_extension(".o");
         auto obj = target->requestObject(objSrc);
         target->addObject(obj);
+    }
+
+    {
+        auto includes = std::vector<std::filesystem::path>{};
+        for (auto it : std::filesystem::recursive_directory_iterator{"."}) {
+            if (it.path().filename() == "include") {
+                includes.push_back(std::filesystem::relative(it.path(), "."));
+            }
+        }
+        target->includes(std::move(includes));
     }
 
     target->output()->buildType = "exe";

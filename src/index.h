@@ -3,6 +3,7 @@
 #include "file.h"
 #include "filter.h"
 #include "nlohmann/json.hpp"
+#include <filesystem>
 #include <memory>
 #include <unordered_set>
 #include <vector>
@@ -19,11 +20,16 @@ struct Index {
 
     Index() {
 
-        for (auto &it : std::filesystem::recursive_directory_iterator{"."}) {
-            if (it.is_regular_file() && shouldInclude(it.path())) {
+        for (auto it = std::filesystem::recursive_directory_iterator{"."};
+             it != decltype(it){};
+             ++it) {
+            if (it->path().filename() == "build") {
+                it.disable_recursion_pending();
+            }
+            if (it->is_regular_file() && shouldInclude(it->path())) {
                 files.push_back(std::make_unique<File>(
-                    std::filesystem::relative(it.path(), "."),
-                    type(it.path())));
+                    std::filesystem::relative(it->path(), "."),
+                    type(it->path())));
             }
         }
     }
