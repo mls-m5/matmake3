@@ -1,8 +1,11 @@
 #pragma once
 
+#include "commandstream.h"
 #include "file.h"
 #include <functional>
 #include <iostream>
+#include <ostream>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 
@@ -15,6 +18,9 @@ using BuildFMap =
 // Rules how to build each file
 // Might be replaced by some json template magick later
 struct BuildContext {
+    BuildContext(BuildFMap map)
+        : map{std::move(map)} {}
+
     BuildFMap map;
 
     std::string compiler = "clang++-16";
@@ -60,10 +66,23 @@ struct BuildContext {
         file.isBuilt = true;
     }
 
+    template <typename... Args>
+    void run(const File &file, Args... args) {
+        auto ss = std::ostringstream{};
+        ((ss << args << " "), ...);
+        _commandList.commands.push_back({ss.str(), file});
+    }
+
+    const CommandList &commandList() {
+        return _commandList;
+    }
+
 private:
     void buildDeps(File &file) {
         for (auto dep : file.dependencies) {
             build(*dep);
         }
     }
+
+    CommandList _commandList;
 };

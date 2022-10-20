@@ -1,8 +1,10 @@
 #include "build.h"
 #include "buildcontext.h"
 #include "commandstream.h"
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <unordered_set>
 
@@ -29,27 +31,40 @@ std::string flags(Target &target) {
 }
 
 void buildObj(BuildContext &context, File &file) {
-    (Command{} << context.common() << " " << file.src->fullPath()
-               << pcmDepString(file) << " -c -o " << file.fullPath())
-        .run();
+    context.run(file,
+                context.common(),
+                file.src->fullPath(),
+                pcmDepString(file),
+                " -c -o ",
+                file.fullPath());
 }
 
 void buildExe(BuildContext &context, File &file) {
-    (Command{} << context.common() << " " << context.linkFlags << " "
-               << file.dependencies << " -o " << file.fullPath())
-        .run();
+    context.run(file,
+                context.common(),
+                " ",
+                context.linkFlags,
+                " ",
+                file.dependencies,
+                " -o ",
+                file.fullPath());
 }
 
 void buildPcm(BuildContext &context, File &file) {
-    (Command{} << context.common() << " " << file.src->fullPath()
-               << pcmDepString(file) << " --precompile -o " << file.fullPath())
-        .run();
+    context.run(file,
+                context.common(),
+                file.src->fullPath(),
+                pcmDepString(file),
+                " --precompile -o ",
+                file.fullPath());
 }
 
 void buildHeaderPcm(BuildContext &context, File &file) {
-    (Command{} << context.common() << " " << file.src->fullPath()
-               << " -fmodule-header -o " << file.fullPath())
-        .run();
+    context.run(file,
+                context.common(),
+                file.src->fullPath(),
+                " -fmodule-header -o ",
+                file.fullPath());
 }
 
 BuildContext buildContext() {
@@ -74,6 +89,12 @@ void build(Target &target, const Settings &settings) {
 
     createBuildPaths(target.index());
     context.build(*out);
+
+    for (auto &command : context.commandList().commands) {
+        if (std::system(command.name.c_str())) {
+            throw std::runtime_error{"failed with command: " + command.name};
+        }
+    }
 }
 
 void createBuildPaths(const Index &index) {
