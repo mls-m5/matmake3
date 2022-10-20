@@ -2,9 +2,25 @@
 #include "deps.h"
 #include <filesystem>
 #include <iostream>
+#include <string>
 #include <vector>
 
 namespace {
+
+File *requestPcm(Target &target, std::string dep) {
+    auto name = dep;
+    auto type = ".pcm";
+    if (dep.front() == '<' || dep.front() == '"') {
+        auto path = std::filesystem::path{name.substr(1, name.size() - 2)}
+                        .replace_extension(".pcm");
+        name = path.string();
+        type = ".h.pcm";
+    }
+    else {
+        name += ".pcm";
+    }
+    return target.requestObject(name, type);
+}
 
 File *createRegularObjectFile(Target &target,
                               std::filesystem::path path,
@@ -15,8 +31,8 @@ File *createRegularObjectFile(Target &target,
 
     auto file = target.createIntermediateFile(path);
     for (auto &dep : deps) {
-        auto module = dep + ".pcm";
-        file->dependencies.push_back(target.requestObject(module));
+        //        auto module = dep + ".pcm";
+        file->dependencies.push_back(requestPcm(target, dep));
     }
 
     file->src = &src;
@@ -79,19 +95,7 @@ File *createPcmFile(Target &target, std::filesystem::path path) {
     {
         auto deps = parseModuleDeps(src->path);
         for (auto &dep : deps) {
-            auto name = dep;
-            auto type = ".pcm";
-            if (dep.front() == '<' || dep.front() == '"') {
-                auto path =
-                    std::filesystem::path{name.substr(1, name.size() - 2)}
-                        .replace_extension(".pcm");
-                name = path.string();
-                type = ".h.pcm";
-            }
-            else {
-                name += ".pcm";
-            }
-            file->dependencies.push_back(target.requestObject(name, type));
+            file->dependencies.push_back(requestPcm(target, dep));
         }
     }
 
