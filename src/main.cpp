@@ -10,9 +10,13 @@ int main(int argc, char *argv[]) {
     auto index = std::make_unique<Index>();
     auto target = createRecursive(*index);
 
-    build(*target);
-
-    auto cachePath = "build/.mm3/default";
+    try {
+        build(*target);
+    }
+    catch (std::runtime_error &e) {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }
 
     //    writeNinjaFile(*index);
     //    return std::system(

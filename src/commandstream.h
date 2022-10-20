@@ -3,16 +3,16 @@
 #include <iostream>
 #include <sstream>
 
-inline bool dryRun = true;
+inline bool dryRun = false;
 
 struct Command : public std::ostringstream {
-    ~Command() {
+    void run() {
         if (dryRun) {
             std::cout << str() << std::endl;
         }
         else {
-            if (!std::system(str().c_str())) {
-                std::runtime_error{"failed commando: " + str()};
+            if (std::system(str().c_str())) {
+                throw std::runtime_error{"failed with command: " + str()};
             }
         }
     }

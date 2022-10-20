@@ -6,25 +6,34 @@
 
 namespace {
 
-void buildObj(BuildContext &context, File &file) {
-    //    std::cerr << "fake compiling... " << file.fullPath() << std::endl;
+std::string pcmDepString(File &file) {
+    auto depss = std::ostringstream{};
 
-    Command{} << context.compiler << " " << file.src->fullPath() << " -c "
-              << file.fullPath();
+    for (auto dep : file.dependencies) {
+        if (dep->fullPath().extension() == ".pcm") {
+            depss << " -fmodule-file=" << dep->fullPath();
+        }
+    }
+
+    return depss.str();
+}
+
+void buildObj(BuildContext &context, File &file) {
+    (Command{} << context.compiler << " " << file.src->fullPath()
+               << pcmDepString(file) << " -c -o " << file.fullPath())
+        .run();
 }
 
 void buildExe(BuildContext &context, File &file) {
-    //    std::cerr << "fake linking... " << file.fullPath() << std::endl;
-
-    Command{} << context.compiler << file.dependencies << " -o "
-              << file.fullPath();
+    (Command{} << context.compiler << file.dependencies << " -o "
+               << file.fullPath())
+        .run();
 }
 
 void buildPcm(BuildContext &context, File &file) {
-    //    std::cerr << "fake pcm build... " << file.fullPath() << std::endl;
-
-    Command{} << context.compiler << " " << file.src->fullPath()
-              << " --precompile -o " << file.fullPath();
+    (Command{} << context.compiler << " " << file.src->fullPath()
+               << pcmDepString(file) << " --precompile -o " << file.fullPath())
+        .run();
 }
 
 BuildContext buildContext() {
