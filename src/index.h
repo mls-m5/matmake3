@@ -11,11 +11,18 @@ struct Index {
     std::vector<std::unique_ptr<File>> files;
 
     Index() {
+        auto type = [](const std::filesystem::path &path) {
+            if (isHeaderFile(path)) {
+                return File::Header;
+            }
+            return isSourceFile(path) ? File::Source : File::Unknown;
+        };
+
         for (auto &it : std::filesystem::recursive_directory_iterator{"."}) {
             if (it.is_regular_file() && shouldInclude(it.path())) {
                 files.push_back(std::make_unique<File>(
                     std::filesystem::relative(it.path(), "."),
-                    isSourceFile(it.path()) ? File::Source : File::Unknown));
+                    type(it.path())));
             }
         }
     }

@@ -65,7 +65,9 @@ void createBuildPaths(const Index &index) {
     }
 
     for (auto &dir : dirs) {
-        //        std::cout << "should create dir " << dir << std::endl;
+        if (dir.empty()) {
+            continue;
+        }
         std::filesystem::create_directories(dir);
     }
 }

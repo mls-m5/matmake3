@@ -10,6 +10,7 @@ struct File {
     enum Type {
         Unknown,
         Source,
+        Header,
         Intermediate,
         Output,
     };
@@ -34,6 +35,7 @@ struct File {
 
         switch (type) {
         case Source:
+        case Header:
             return path;
         case Intermediate:
             return cachePath / path;
@@ -64,6 +66,7 @@ NLOHMANN_JSON_SERIALIZE_ENUM(File::Type,
                              {
                                  {File::Unknown, "unknown"},
                                  {File::Source, "source"},
+                                 {File::Header, "source"},
                                  {File::Intermediate, "intermediate"},
                                  {File::Output, "output"},
                              })

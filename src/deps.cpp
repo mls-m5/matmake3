@@ -14,6 +14,12 @@ std::vector<std::string> parseModuleDeps(std::filesystem::path path) {
     auto exportImportStr = "export import "sv;
 
     for (std::string line; std::getline(file, line);) {
+        if (line.empty()) {
+            continue;
+        }
+        if (line.back() == '\r') {
+            line.pop_back();
+        }
         if (line.rfind(importStr, 0) == 0) {
             auto dep = line.substr(importStr.size());
             if (dep.empty()) {

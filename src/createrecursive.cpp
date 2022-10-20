@@ -65,7 +65,8 @@ File *createPcmFile(Target &target, std::filesystem::path path) {
 
     if (!src) {
         throw std::runtime_error{
-            "could not find source for pcm (c++-module) file"};
+            "could not find source for pcm (c++-module) file " +
+            srcPath.string()};
     }
 
     path = src->sameDir(path);
