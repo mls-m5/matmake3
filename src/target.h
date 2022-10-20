@@ -64,7 +64,6 @@ public:
     friend void to_json(nlohmann::json &j, const Target &t) {
         j = nlohmann::json{
             {"files", t._files},
-            //            {"objs", t._objects},
             {"name", t._name},
         };
     }

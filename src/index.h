@@ -42,6 +42,17 @@ struct Index {
         return nullptr;
     }
 
+    std::vector<File *> findAll(std::string extension) {
+        auto files = std::vector<File *>{};
+        for (auto &f : this->files) {
+            if (f->path.extension() == extension) {
+                files.push_back(f.get());
+            }
+        }
+
+        return files;
+    }
+
     friend void to_json(nlohmann::json &j, const Index &i) {
         j = nlohmann::json{{"files", i.files}};
     }

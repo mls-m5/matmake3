@@ -103,8 +103,12 @@ std::unique_ptr<Target> createRecursive(Index &index) {
     target->registerFunction(".o", createObjectFile);
     target->registerFunction(".pcm", createPcmFile);
 
-    auto main = target->requestObject("main.o");
-    target->addObject(main);
+    for (auto src : index.findAll(".cpp")) {
+        auto objSrc = src->path;
+        objSrc.replace_extension(".o");
+        auto obj = target->requestObject(objSrc);
+        target->addObject(obj);
+    }
 
     std::cout << std::setw(2) << nlohmann::json{{"index", index},{"target",*target},} << std::endl;
 
