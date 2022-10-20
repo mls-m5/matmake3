@@ -49,10 +49,10 @@ void writeNinjaFile(const Index &index) {
     };
 
     for (auto &src : index.files) {
-        if (isSourceFile(src.path)) {
-            auto opath = srcToObj(src.path);
+        if (isSourceFile(src->path)) {
+            auto opath = srcToObj(src->path);
 
-            file << "build " << opath.string() << ": cxx " << src.path.string()
+            file << "build " << opath.string() << ": cxx " << src->path.string()
                  << "\n";
             set("cxx", "g++");
             file << "\n";
@@ -65,10 +65,10 @@ void writeNinjaFile(const Index &index) {
     file << "build " << (outPath / parentPath).string() << ": exe ";
 
     for (auto &src : index.files) {
-        if (!src.isSource()) {
+        if (!src->isSource()) {
             continue;
         }
-        auto opath = srcToObj(src.path);
+        auto opath = srcToObj(src->path);
         printEscaped(file, opath.string());
         file << " ";
     }

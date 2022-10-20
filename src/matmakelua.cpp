@@ -63,25 +63,25 @@ int glob(lua_State *L) {
 
     if (res.empty()) {
         for (auto &file : fileIndex->files) {
-            if (!file.isSource()) {
+            if (!file->isSource()) {
                 continue;
             }
 
-            pushToTable(file.path);
+            pushToTable(file->path);
 
             ++index;
         }
     }
     else {
         for (auto &file : fileIndex->files) {
-            if (!file.isSource()) {
+            if (!file->isSource()) {
                 continue;
             }
 
             bool isMatch = false;
 
             for (auto &re : res) {
-                if (std::regex_match(file.path.string(), re)) {
+                if (std::regex_match(file->path.string(), re)) {
                     isMatch = true;
                     break;
                 }
@@ -91,9 +91,9 @@ int glob(lua_State *L) {
                 continue;
             }
 
-            std::cout << "matching: " << file.path << std::endl;
+            std::cout << "matching: " << file->path << std::endl;
 
-            pushToTable(file.path);
+            pushToTable(file->path);
 
             ++index;
         }

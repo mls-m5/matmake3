@@ -2,16 +2,10 @@
 
 #include "filter.h"
 #include <filesystem>
+#include <vector>
 
 struct File {
-    enum Type {
-        Unknown,
-        Source,
-    };
-
-    std::filesystem::path path;
-    Type type = Unknown;
-
+    ~File() = default;
     File(std::filesystem::path p)
         : path{std::move(p)} {
         if (isSourceFile(path)) {
@@ -19,7 +13,24 @@ struct File {
         }
     }
 
+    File(const File &) = delete;
+    File(File &&) = delete;
+    File operator=(const File &) = delete;
+    File operator=(File &&) = delete;
+
+    enum Type {
+        Unknown,
+        Source,
+        Intermediate,
+        Output,
+    };
+
+    std::filesystem::path path;
+    Type type = Unknown;
+
     bool isSource() const {
         return type == Source;
     }
+
+    std::vector<File *> dependencies;
 };
