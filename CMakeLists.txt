@@ -11,6 +11,7 @@ add_executable(
     src/filter.cpp
     src/glob.cpp
     src/matmakelua.cpp
+    src/createrecursive.cpp
     )
 
 target_compile_features(

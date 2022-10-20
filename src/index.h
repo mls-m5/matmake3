@@ -25,4 +25,18 @@ struct Index {
         }
         return nullptr;
     }
+
+    File *find(std::filesystem::path path) {
+        for (auto &f : files) {
+            if (f->path == path) {
+                return f.get();
+            }
+        }
+        for (auto &f : files) {
+            if (f->path.filename() == path) {
+                return f.get();
+            }
+        }
+        return nullptr;
+    }
 };

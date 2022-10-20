@@ -1,15 +1,8 @@
+#include "createrecursive.h"
 #include "index.h"
 #include "ninja.h"
 #include "target.h"
 #include <iostream>
-
-std::unique_ptr<Target> createRecursive(Index &index) {
-    auto target = std::make_unique<Target>(index);
-
-    auto mainSrc = target->index().getMainSrc();
-
-    return target;
-}
 
 int main(int argc, char *argv[]) {
     std::ios::sync_with_stdio(false);
