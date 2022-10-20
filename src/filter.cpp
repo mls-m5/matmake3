@@ -1,6 +1,6 @@
 #include "filter.h"
 
-bool isHeaderFile(const std::filesystem::__cxx11::path &path) {
+bool isHeaderFile(const std::filesystem::path &path) {
     auto ext = path.extension();
     static constexpr auto arr = std::array{
         ".h",
@@ -14,7 +14,7 @@ bool isHeaderFile(const std::filesystem::__cxx11::path &path) {
     return false;
 }
 
-bool isSourceFile(const std::filesystem::__cxx11::path &path) {
+bool isSourceFile(const std::filesystem::path &path) {
     auto ext = path.extension();
     static constexpr auto arr = std::array{
         ".cpp",
@@ -28,6 +28,6 @@ bool isSourceFile(const std::filesystem::__cxx11::path &path) {
     return false;
 }
 
-bool shouldInclude(const std::filesystem::__cxx11::path &path) {
+bool shouldInclude(const std::filesystem::path &path) {
     return isSourceFile(path) || isHeaderFile(path);
 }

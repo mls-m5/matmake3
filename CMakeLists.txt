@@ -9,6 +9,8 @@ add_executable(
     src/main.cpp
     src/ninja.cpp
     src/filter.cpp
+    src/glob.cpp
+    src/matmakelua.cpp
     )
 
 target_compile_features(
