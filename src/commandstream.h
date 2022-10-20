@@ -7,8 +7,8 @@ inline bool dryRun = false;
 
 struct Command : public std::ostringstream {
     void run() {
+        std::cout << str() << std::endl;
         if (dryRun) {
-            std::cout << str() << std::endl;
         }
         else {
             if (std::system(str().c_str())) {

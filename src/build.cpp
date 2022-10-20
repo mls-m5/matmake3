@@ -36,11 +36,18 @@ void buildPcm(BuildContext &context, File &file) {
         .run();
 }
 
+void buildHeaderPcm(BuildContext &context, File &file) {
+    (Command{} << context.compiler << " " << file.src->fullPath()
+               << " -fmodule-header -o " << file.fullPath())
+        .run();
+}
+
 BuildContext buildContext() {
     return {{
         {".o", buildObj},
         {"exe", buildExe},
         {".pcm", buildPcm},
+        {".h.pcm", buildHeaderPcm},
     }};
 }
 

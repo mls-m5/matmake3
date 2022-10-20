@@ -21,12 +21,13 @@ public:
 
     // Try to find an object, and create with the right function if it does not
     // exist
-    File *requestObject(std::filesystem::path path) {
+    File *requestObject(std::filesystem::path path, std::string type = "") {
         if (auto f = _index->find(path)) {
             return f;
         }
         else {
-            if (auto func = _createFunctions.find(path.extension());
+            type = type.empty() ? path.extension().string() : type;
+            if (auto func = _createFunctions.find(type);
                 func != _createFunctions.end()) {
                 auto file = func->second(*this, path);
 
@@ -39,6 +40,8 @@ public:
             }
         }
 
+        throw std::runtime_error{"no known way to create file for " +
+                                 path.string() + " of type " + type};
         return nullptr;
     }
 
@@ -79,6 +82,10 @@ public:
 
     const Index &index() const {
         return *_index;
+    }
+
+    File *findSystemFile(std::filesystem::path path) {
+        return _index->findSystemFile(path);
     }
 
 private:

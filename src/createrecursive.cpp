@@ -77,7 +77,19 @@ File *createPcmFile(Target &target, std::filesystem::path path) {
     {
         auto deps = parseModuleDeps(src->path);
         for (auto &dep : deps) {
-            file->dependencies.push_back(target.requestObject(dep + ".pcm"));
+            auto name = dep;
+            auto type = ".pcm";
+            if (dep.front() == '<' || dep.front() == '"') {
+                auto path =
+                    std::filesystem::path{name.substr(1, name.size() - 2)}
+                        .replace_extension(".pcm");
+                name = path.string();
+                type = ".h.pcm";
+            }
+            else {
+                name += ".pcm";
+            }
+            file->dependencies.push_back(target.requestObject(name, type));
         }
     }
 
@@ -98,6 +110,64 @@ File *createPcmFile(Target &target, std::filesystem::path path) {
     return file;
 }
 
+File *createPcmHeaderFile(Target &target, std::filesystem::path path) {
+    auto srcPath = path;
+    srcPath.replace_extension(".h");
+    auto src = target.find(srcPath);
+
+    if (!src) {
+        src = target.findSystemFile(srcPath);
+    }
+
+    if (!src) {
+        throw std::runtime_error{
+            "could not find source for pcm (c++-module) file " +
+            srcPath.string()};
+    }
+
+    path = src->sameDir(path);
+
+    auto file = target.createIntermediateFile(path);
+    file->buildType = ".h.pcm";
+    file->src = src;
+
+    //    {
+    //        auto deps = parseModuleDeps(src->path);
+    //        for (auto &dep : deps) {
+    //            auto name = dep;
+    //            auto type = ".pcm";
+    //            if (dep.front() == '<' || dep.front() == '"') {
+    //                auto path =
+    //                    std::filesystem::path{name.substr(1, name.size() - 2)}
+    //                        .replace_extension(".pcm");
+    //                name = path.string();
+    //                type = ".h.pcm";
+    //            }
+    //            else {
+    //                name += ".pcm";
+    //            }
+    //            file->dependencies.push_back(target.requestObject(name,
+    //            type));
+    //        }
+    //    }
+
+    //    {
+    //        auto objPath = path;
+    //        objPath.replace_extension(".o");
+    //        auto objFile = target.find(objPath);
+    //        if (objFile) {
+    //            throw std::runtime_error{
+    //                objPath.string() +
+    //                " does already exist, refusing to create duplicate"};
+    //        }
+
+    //        objFile = createModuleObjectFile(target, objPath, *file);
+    //        target.addObject(objFile);
+    //    }
+
+    return file;
+}
+
 } // namespace
 
 std::unique_ptr<Target> createRecursive(Index &index) {
@@ -105,6 +175,7 @@ std::unique_ptr<Target> createRecursive(Index &index) {
 
     target->registerFunction(".o", createObjectFile);
     target->registerFunction(".pcm", createPcmFile);
+    target->registerFunction(".h.pcm", createPcmHeaderFile);
 
     for (auto src : index.findAll(".cpp")) {
         auto objSrc = src->path;

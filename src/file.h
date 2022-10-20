@@ -30,6 +30,10 @@ struct File {
     }
 
     std::filesystem::path fullPath() {
+        if (!alias.empty()) {
+            return alias;
+        }
+
         auto cachePath = "build/.mm3/default";
         auto outPath = "build/default";
 
@@ -54,6 +58,7 @@ struct File {
     friend void to_json(nlohmann::json &j, const File &file);
 
     std::filesystem::path path;
+    std::filesystem::path alias;
     Type type = Unknown;
     std::vector<File *> dependencies;
     File *src = nullptr;
@@ -93,6 +98,7 @@ inline void to_json(nlohmann::json &j, const File &file) {
         {"src", file.src},
         {"type", file.type},
         {"buildType", file.buildType},
+        {"alias", file.alias},
     };
 }
 
