@@ -9,6 +9,8 @@ File *createRegularObjectFile(Target &target,
                               File &src) {
     auto deps = parseModuleDeps(src.path);
 
+    path = src.sameDir(path);
+
     auto file = target.createIntermediateFile(path);
     for (auto &dep : deps) {
         auto module = dep + ".pcm";
@@ -22,7 +24,12 @@ File *createModuleObjectFile(Target &target,
                              std::filesystem::path path,
                              File &src) {
 
-    return nullptr;
+    path = src.sameDir(path);
+
+    auto file = target.createIntermediateFile(path);
+    file->dependencies.push_back(&src);
+
+    return file;
 }
 
 File *createObjectFile(Target &target, std::filesystem::path path) {
@@ -39,6 +46,8 @@ File *createObjectFile(Target &target, std::filesystem::path path) {
     auto srcPath = path;
     srcPath.replace_extension(".cpp");
     auto src = target.find(srcPath);
+
+    path = src->sameDir(path);
 
     if (src) {
         return createRegularObjectFile(target, path, *src);
@@ -57,8 +66,31 @@ File *createPcmFile(Target &target, std::filesystem::path path) {
             "could not find source for pcm (c++-module) file"};
     }
 
+    path = src->sameDir(path);
+
     auto file = target.createIntermediateFile(path);
     file->dependencies.push_back(src);
+
+    {
+        auto deps = parseModuleDeps(src->path);
+        for (auto &dep : deps) {
+            file->dependencies.push_back(target.requestObject(dep + ".pcm"));
+        }
+    }
+
+    {
+        auto objPath = path;
+        objPath.replace_extension(".o");
+        auto objFile = target.find(objPath);
+        if (objFile) {
+            throw std::runtime_error{
+                objPath.string() +
+                " does already exist, refusing to create duplicate"};
+        }
+
+        objFile = createModuleObjectFile(target, objPath, *file);
+        target.addObject(objFile);
+    }
 
     return file;
 }
@@ -66,12 +98,13 @@ File *createPcmFile(Target &target, std::filesystem::path path) {
 } // namespace
 
 std::unique_ptr<Target> createRecursive(Index &index) {
-    auto target = std::make_unique<Target>(index);
+    auto target = std::make_unique<Target>("main", index);
 
     target->registerFunction(".o", createObjectFile);
     target->registerFunction(".pcm", createPcmFile);
 
-    target->requestObject("main.o");
+    auto main = target->requestObject("main.o");
+    target->addObject(main);
 
     std::cout << std::setw(2) << nlohmann::json{{"index", index},{"target",*target},} << std::endl;
 

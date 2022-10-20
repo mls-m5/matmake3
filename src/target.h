@@ -13,8 +13,11 @@ public:
     Target &operator=(const Target &) = delete;
     Target &operator=(Target &&) = delete;
 
-    Target(Index &index)
-        : _index{&index} {}
+    Target(std::string name, Index &index)
+        : _index{&index} {
+        _output = createIntermediateFile(name);
+        _output->type = File::Output;
+    }
 
     // Try to find an object, and create with the right function if it does not
     // exist
@@ -61,12 +64,22 @@ public:
     friend void to_json(nlohmann::json &j, const Target &t) {
         j = nlohmann::json{
             {"files", t._files},
+            //            {"objs", t._objects},
+            {"name", t._name},
         };
+    }
+
+    void addObject(File *file) {
+        _output->dependencies.push_back(file);
     }
 
 private:
     Index *_index;
 
     std::vector<File *> _files;
+    //    std::vector<File *> _objects;
     std::unordered_map<std::string, CreateT> _createFunctions;
+    std::string _name = "main";
+
+    File *_output = nullptr;
 };

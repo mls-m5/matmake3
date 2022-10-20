@@ -32,6 +32,11 @@ struct File {
         return type == Source;
     }
 
+    // Where to put file if it were in the same path
+    std::filesystem::path sameDir(std::filesystem::path path) {
+        return this->path.parent_path() / path.filename();
+    }
+
     friend void to_json(nlohmann::json &j, const File &file);
 
     std::filesystem::path path;
@@ -59,8 +64,8 @@ inline void to_json(nlohmann::json &j, const File *f) {
 
 inline void to_json(nlohmann::json &j, const File &file) {
     j = {
-        {"id", file.id},
         {"path", file.path},
+        {"id", file.id},
         {"deps", file.dependencies},
         {"type", file.type},
     };
