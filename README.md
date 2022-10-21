@@ -15,6 +15,8 @@ Possibility to build without configuration files.
 wget https://apt.llvm.org/llvm.sh
 chmod +x llvm.sh
 sudo ./llvm.sh 16
+
+sudo apt install libc++-16-dev libc++abi-16-dev
 ``` 
 
 ## References

@@ -2,6 +2,7 @@
 #include "deps.h"
 #include <filesystem>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -19,7 +20,7 @@ File *requestPcm(Target &target, std::string dep) {
     else {
         name += ".pcm";
     }
-    return target.requestObject(name, type);
+    return target.requestObject(name, dep, type);
 }
 
 File *createRegularObjectFile(Target &target,
@@ -52,7 +53,9 @@ File *createModuleObjectFile(Target &target,
     return file;
 }
 
-File *createObjectFile(Target &target, std::filesystem::path path) {
+File *createObjectFile(Target &target,
+                       std::filesystem::path path,
+                       std::filesystem::path from) {
     {
         auto srcPath = path;
         srcPath.replace_extension(".cppm");
@@ -76,7 +79,9 @@ File *createObjectFile(Target &target, std::filesystem::path path) {
     return nullptr;
 }
 
-File *createPcmFile(Target &target, std::filesystem::path path) {
+File *createPcmFile(Target &target,
+                    std::filesystem::path path,
+                    std::filesystem::path from) {
     auto srcPath = path;
     srcPath.replace_extension(".cppm");
     auto src = target.find(srcPath);
@@ -116,25 +121,37 @@ File *createPcmFile(Target &target, std::filesystem::path path) {
     return file;
 }
 
-File *createPcmHeaderFile(Target &target, std::filesystem::path path) {
-    auto srcPath = path;
-    srcPath.replace_extension(".h");
-    auto src = target.find(srcPath);
+File *createPcmHeaderFile(Target &target,
+                          std::filesystem::path path,
+                          std::filesystem::path from) {
+    bool isSystemHeader = false;
 
-    if (!src) {
-        src = target.findSystemFile(srcPath);
+    if (from.string().front() == '<') {
+        isSystemHeader = true;
     }
+    else if (from.string().front() != '\"') {
+        throw std::runtime_error{"not a header: " + from.string()};
+    }
+
+    auto srcPath = from.string();
+    srcPath = srcPath.substr(1, srcPath.size() - 2);
+    auto src = [isSystemHeader, srcPath, &target] {
+        if (isSystemHeader) {
+            return target.findSystemFile(srcPath);
+        }
+
+        return target.find(srcPath);
+    }();
 
     if (!src) {
         throw std::runtime_error{
-            "could not find source for pcm (c++-module) file " +
-            srcPath.string()};
+            "could not find source for pcm (c++-module) file " + srcPath};
     }
 
     path = src->sameDir(path);
 
     auto file = target.createIntermediateFile(path);
-    file->buildType = ".h.pcm";
+    file->buildType = isSystemHeader ? "sys.h.pcm" : ".h.pcm";
     file->src = src;
     return file;
 }
@@ -151,7 +168,7 @@ std::unique_ptr<Target> createRecursive(Index &index) {
     for (auto src : index.findAll(".cpp")) {
         auto objSrc = src->path;
         objSrc.replace_extension(".o");
-        auto obj = target->requestObject(objSrc);
+        auto obj = target->requestObject(objSrc, src->path);
         target->addObject(obj);
     }
 

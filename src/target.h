@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <functional>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -24,7 +25,10 @@ public:
 
     // Try to find an object, and create with the right function if it does not
     // exist
-    File *requestObject(std::filesystem::path path, std::string type = "") {
+    // Request name is the name from where the path is generated
+    File *requestObject(std::filesystem::path path,
+                        std::filesystem::path requestName,
+                        std::string type = "") {
         if (auto f = _index->find(path)) {
             return f;
         }
@@ -32,7 +36,7 @@ public:
             type = type.empty() ? path.extension().string() : type;
             if (auto func = _createFunctions.find(type);
                 func != _createFunctions.end()) {
-                auto file = func->second(*this, path);
+                auto file = func->second(*this, path, requestName);
 
                 if (!file) {
                     throw std::runtime_error{"could not create file " +
@@ -48,8 +52,9 @@ public:
         return nullptr;
     }
 
-    using CreateT =
-        std::function<File *(Target &target, std::filesystem::path path)>;
+    using CreateT = std::function<File *(Target &target,
+                                         std::filesystem::path path,
+                                         std::filesystem::path from)>;
 
     void registerFunction(std::filesystem::path extension, CreateT f) {
         _createFunctions[extension] = f;

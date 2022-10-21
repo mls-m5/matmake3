@@ -3,6 +3,7 @@
 #include "commandstream.h"
 #include <cstdlib>
 #include <iostream>
+#include <ostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -42,9 +43,7 @@ void buildObj(BuildContext &context, File &file) {
 void buildExe(BuildContext &context, File &file) {
     context.run(file,
                 context.common(),
-                " ",
                 context.linkFlags,
-                " ",
                 file.dependencies,
                 " -o ",
                 file.fullPath());
@@ -67,12 +66,24 @@ void buildHeaderPcm(BuildContext &context, File &file) {
                 file.fullPath());
 }
 
+void buildSysHeaderPcm(BuildContext &context, File &file) {
+    context.run(file,
+                context.common(),
+                "-xc++-system-header --precompile",
+                file.src->fullPath(),
+                " -o ",
+                file.fullPath(),
+                "-Wno-pragma-system-header-outside-header",
+                "-Wno-user-defined-literals");
+}
+
 BuildContext buildContext() {
     auto context = BuildContext{{
         {".o", buildObj},
         {"exe", buildExe},
         {".pcm", buildPcm},
         {".h.pcm", buildHeaderPcm},
+        {"sys.h.pcm", buildSysHeaderPcm},
     }};
 
     return context;
@@ -91,6 +102,9 @@ void build(Target &target, const Settings &settings) {
     context.build(*out);
 
     for (auto &command : context.commandList().commands) {
+        std::cout << "build " << command.file.fullPath().filename()
+                  << std::endl;
+        std::cout << command.name << std::endl;
         if (std::system(command.name.c_str())) {
             throw std::runtime_error{"failed with command: " + command.name};
         }

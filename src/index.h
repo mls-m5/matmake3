@@ -69,11 +69,21 @@ struct Index {
     }
 
     File *findSystemFile(std::filesystem::path path) {
+        // TODO: Do something more generic
+        auto libcHeaders = "/usr/lib/llvm-16/include/c++/v1/";
+
         if (auto file = find(path)) {
             return file;
         }
 
-        auto fullPath = "/usr/include" / path;
+        auto fullPath = libcHeaders / path;
+        if (std::filesystem::exists(fullPath)) {
+            files.push_back(std::make_unique<File>(path, type(path)));
+            files.back()->alias = fullPath;
+            return files.back().get();
+        }
+
+        fullPath = "/usr/include" / path;
         if (std::filesystem::exists(fullPath)) {
             files.push_back(std::make_unique<File>(path, type(path)));
             files.back()->alias = fullPath;

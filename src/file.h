@@ -29,7 +29,7 @@ struct File {
         return type == Source;
     }
 
-    std::filesystem::path fullPath() {
+    std::filesystem::path fullPath() const {
         if (!alias.empty()) {
             return alias;
         }

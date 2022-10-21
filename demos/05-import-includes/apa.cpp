@@ -1,6 +1,6 @@
 import "apa.h";
-
-#include <iostream>
+import <iostream>;
+// import <string>; // Causes an error
 
 int print() {
     std::cout << "hello" << std::endl;

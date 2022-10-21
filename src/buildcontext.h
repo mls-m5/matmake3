@@ -24,7 +24,7 @@ struct BuildContext {
     BuildFMap map;
 
     std::string compiler = "clang++-16";
-    std::string flags = "-std=c++20";
+    std::string flags = "-std=c++20 -stdlib=libc++";
     std::string linkFlags = "";
 
     std::string common() {
@@ -44,7 +44,7 @@ struct BuildContext {
             build(*file.src);
         }
 
-        std::cout << "build " << file.fullPath().filename().string()
+        std::cout << "prepare " << file.fullPath().filename().string()
                   << std::endl;
 
         auto buildType = file.buildType;
@@ -80,6 +80,9 @@ struct BuildContext {
 private:
     void buildDeps(File &file) {
         for (auto dep : file.dependencies) {
+            if (dep == &file) {
+                continue;
+            }
             build(*dep);
         }
     }
