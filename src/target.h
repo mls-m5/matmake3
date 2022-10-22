@@ -68,10 +68,8 @@ public:
 
     // Create temporary file that can be removed after compilation
     File *createIntermediateFile(std::filesystem::path path) {
-        auto file =
-            std::make_unique<File>(path,
-                                   fullPath(_paths, path, File::Intermediate),
-                                   File::Intermediate);
+        auto file = std::make_unique<File>(
+            path, _paths.cache / path, File::Intermediate);
         _files.push_back(file.get());
         _index->files.push_back(std::move(file));
         return _index->files.back().get();

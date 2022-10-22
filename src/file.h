@@ -87,26 +87,6 @@ inline void to_json(nlohmann::json &j, const std::unique_ptr<File> &f) {
     to_json(j, *f);
 }
 
-inline std::filesystem::path fullPath(const BuildPaths &paths,
-                                      const std::filesystem::path &path,
-                                      File::Type type) {
-    //    if (!file.alias.empty()) {
-    //        return file.alias;
-    //    }
-
-    switch (type) {
-    case File::Source:
-    case File::Header:
-        return path;
-    case File::Intermediate:
-        return paths.cache / path;
-    case File::Output:
-        return paths.out / path;
-    default:
-        throw std::runtime_error{"invalid file " + path.string()};
-    }
-}
-
 inline std::ostream &operator<<(std::ostream &stream,
                                 const std::vector<File *> files) {
     for (auto &file : files) {
