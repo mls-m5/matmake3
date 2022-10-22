@@ -1,26 +1,15 @@
 #pragma once
 
-#include "buildpaths.h"
 #include "nlohmann/json.hpp"
-#include "uniqueid.h"
 #include <filesystem>
 #include <ostream>
 #include <vector>
 
 struct File {
-    enum Type {
-        Unknown,
-        Source,
-        Header,
-        Intermediate,
-        Output,
-    };
-
     ~File() = default;
-    File(std::filesystem::path p, std::filesystem::path fullPath, Type type)
+    File(std::filesystem::path p, std::filesystem::path fullPath)
         : path{std::move(p)}
-        , fullPath{std::move(fullPath)}
-        , type{type} {}
+        , fullPath{std::move(fullPath)} {}
 
     File(const File &) = delete;
     File(File &&) = delete;
@@ -28,7 +17,7 @@ struct File {
     File operator=(File &&) = delete;
 
     bool isSource() const {
-        return type == Source;
+        return !src && dependencies.empty();
     }
 
     // Where to put file if it were in the same path
@@ -40,22 +29,11 @@ struct File {
 
     std::filesystem::path path;
     std::filesystem::path fullPath;
-    Type type = Unknown;
     std::vector<File *> dependencies;
     File *src = nullptr;
-    Id id = uniqueId();
     bool isBuilt = false;       // Only used for when building in application
     std::string buildType = ""; // Override file extension
 };
-
-NLOHMANN_JSON_SERIALIZE_ENUM(File::Type,
-                             {
-                                 {File::Unknown, "unknown"},
-                                 {File::Source, "source"},
-                                 {File::Header, "source"},
-                                 {File::Intermediate, "intermediate"},
-                                 {File::Output, "output"},
-                             })
 
 inline void to_json(nlohmann::json &j, const File *f) {
     if (!f) {
@@ -63,22 +41,15 @@ inline void to_json(nlohmann::json &j, const File *f) {
         return;
     }
 
-    if (false) {
-        j = f->id;
-    }
-    else {
-        j = f->path;
-    }
+    j = f->path;
 }
 
 inline void to_json(nlohmann::json &j, const File &file) {
     j = {
         {"path", file.path},
         {"fullPath", file.fullPath},
-        {"id", file.id},
         {"deps", file.dependencies},
         {"src", file.src},
-        {"type", file.type},
         {"buildType", file.buildType},
     };
 }

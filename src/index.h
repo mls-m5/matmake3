@@ -11,15 +11,7 @@
 struct Index {
     std::vector<std::unique_ptr<File>> files;
 
-    static auto type(const std::filesystem::path &path) {
-        if (isHeaderFile(path)) {
-            return File::Header;
-        }
-        return isSourceFile(path) ? File::Source : File::Unknown;
-    };
-
     Index() {
-
         for (auto it = std::filesystem::recursive_directory_iterator{"."};
              it != decltype(it){};
              ++it) {
@@ -28,19 +20,9 @@ struct Index {
             }
             if (it->is_regular_file() && shouldInclude(it->path())) {
                 auto rpath = std::filesystem::relative(it->path(), ".");
-                files.push_back(
-                    std::make_unique<File>(rpath, rpath, type(it->path())));
+                files.push_back(std::make_unique<File>(rpath, rpath));
             }
         }
-    }
-
-    File *getMainSrc() {
-        for (auto &f : files) {
-            if (f->path.stem() == "main") {
-                return f.get();
-            }
-        }
-        return nullptr;
     }
 
     File *find(std::filesystem::path path) {
@@ -78,13 +60,13 @@ struct Index {
 
         auto fullPath = libcHeaders / path;
         if (std::filesystem::exists(fullPath)) {
-            files.push_back(std::make_unique<File>(path, fullPath, type(path)));
+            files.push_back(std::make_unique<File>(path, fullPath));
             return files.back().get();
         }
 
         fullPath = "/usr/include" / path;
         if (std::filesystem::exists(fullPath)) {
-            files.push_back(std::make_unique<File>(path, fullPath, type(path)));
+            files.push_back(std::make_unique<File>(path, fullPath));
             return files.back().get();
         }
         return nullptr;

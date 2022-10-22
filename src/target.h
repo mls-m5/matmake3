@@ -21,8 +21,7 @@ public:
     Target(std::string name, Index &index, const BuildPaths &paths)
         : _index{&index}
         , _paths{paths} {
-        _output = createIntermediateFile(name);
-        _output->type = File::Output;
+        _output = createOutputFile(name);
     }
 
     // Try to find an object, and create with the right function if it does not
@@ -68,8 +67,14 @@ public:
 
     // Create temporary file that can be removed after compilation
     File *createIntermediateFile(std::filesystem::path path) {
-        auto file = std::make_unique<File>(
-            path, _paths.cache / path, File::Intermediate);
+        auto file = std::make_unique<File>(path, _paths.cache / path);
+        _files.push_back(file.get());
+        _index->files.push_back(std::move(file));
+        return _index->files.back().get();
+    }
+
+    File *createOutputFile(std::filesystem::path path) {
+        auto file = std::make_unique<File>(path, _paths.out / path);
         _files.push_back(file.get());
         _index->files.push_back(std::move(file));
         return _index->files.back().get();
