@@ -58,6 +58,8 @@ void buildPcm(BuildContext &context, File &file) {
                 context.common(),
                 file.src->fullPath,
                 pcmDepString(context, file),
+                "-MD -MF",
+                file.depFile(),
                 " --precompile -o ",
                 file.fullPath);
 }
@@ -66,6 +68,8 @@ void buildHeaderPcm(BuildContext &context, File &file) {
     context.run(file,
                 context.common(),
                 file.src->fullPath,
+                "-MD -MF",
+                file.depFile(),
                 " -fmodule-header -o ",
                 file.fullPath);
 }

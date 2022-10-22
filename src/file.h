@@ -27,6 +27,10 @@ struct File {
 
     friend void to_json(nlohmann::json &j, const File &file);
 
+    std::filesystem::path depFile() const {
+        return fullPath.string() + ".d";
+    }
+
     std::filesystem::path path;
     std::filesystem::path fullPath;
     std::vector<File *> dependencies;

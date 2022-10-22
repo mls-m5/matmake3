@@ -37,7 +37,8 @@ void writeNinjaFile(const BuildPaths &paths, const CommandList &list) {
 
         file << "# Ninja file generated with matmake3\n\n";
         file << "rule run\n";
-        file << "    command = $cmd\n\n";
+        file << "    command = $cmd\n";
+        file << "  depfile = $out.d\n\n";
 
         for (auto &command : list.commands()) {
             file << "build " << command.out.string() << ": run";
