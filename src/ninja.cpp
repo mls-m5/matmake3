@@ -55,7 +55,9 @@ void writeNinjaFile(const BuildPaths &paths, const CommandList &list) {
     {
         auto ss = std::ostringstream{};
         ss << "ninja -f " << ninjaPath;
-        std::system(ss.str().c_str());
+        if (std::system(ss.str().c_str())) {
+            throw std::runtime_error{"ninja build failed"};
+        }
     }
 
     //    auto cxx = "${cxx} -x c++ ${in} ${modules} -o $out -c ${cxxflags}
