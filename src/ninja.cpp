@@ -1,6 +1,9 @@
 #include "ninja.h"
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 void printEscaped(std::ostream &stream, std::string_view str) {
     for (auto c : str) {
@@ -16,17 +19,42 @@ void printEscaped(std::ostream &stream, std::string_view str) {
 void writeNinjaFile(const BuildContext &context, const CommandList &list) {
 
     std::filesystem::create_directories(context.paths().cache);
-    auto file = std::ofstream{std::filesystem::path{context.paths().cache} /
-                              "build.ninja"};
+    auto ninjaPath = std::filesystem::path{
+        std::filesystem::path{context.paths().cache} / "build.ninja"};
+    {
+        auto file = std::ofstream{ninjaPath};
 
-    std::cout << "printing build.ninja" << std::endl;
+        if (!file) {
+            throw std::runtime_error{"could not open " + ninjaPath.string() +
+                                     " for writing"};
+        }
 
-    file << "# Ninja file generated with matmake3\n\n";
-    file << "rule run\n";
-    file << "    command = $cmd\n\n";
+        //    auto &file = std::cout;
 
-    for (auto &command : list.commands()) {
-        file << "build" << command.out << ": run ";
+        std::cout << "writing to " << std::filesystem::absolute(ninjaPath)
+                  << std::endl;
+
+        file << "# Ninja file generated with matmake3\n\n";
+        file << "rule run\n";
+        file << "    command = $cmd\n\n";
+
+        for (auto &command : list.commands()) {
+            file << "build " << command.out.string() << ": run";
+
+            if (command.file.src) {
+                file << " " << command.file.src->fullPath.string();
+            }
+            for (auto dep : command.file.dependencies) {
+                file << " " << dep->fullPath.string();
+            }
+            file << "\n  cmd = " << command.command << "\n\n";
+        }
+    }
+
+    {
+        auto ss = std::ostringstream{};
+        ss << "ninja -f " << ninjaPath;
+        std::system(ss.str().c_str());
     }
 
     //    auto cxx = "${cxx} -x c++ ${in} ${modules} -o $out -c ${cxxflags}

@@ -8,6 +8,7 @@
 struct Settings {
     std::string linkFlags;
     BuildPaths paths;
+    bool shouldBuildNative = false;
 
     Settings(int argc, char **argv) {
         auto args = std::vector<std::string>(argv + 1, argv + argc);

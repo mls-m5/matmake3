@@ -18,7 +18,7 @@ struct CommandList {
         _commands.push_back({std::move(command), file, path});
     }
 
-    auto &commands() const {
+    const auto &commands() const {
         return _commands;
     }
 

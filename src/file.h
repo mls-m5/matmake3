@@ -75,6 +75,7 @@ inline void to_json(nlohmann::json &j, const File *f) {
 inline void to_json(nlohmann::json &j, const File &file) {
     j = {
         {"path", file.path},
+        {"fullPath", file.fullPath},
         {"id", file.id},
         {"deps", file.dependencies},
         {"src", file.src},
