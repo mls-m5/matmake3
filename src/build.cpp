@@ -66,14 +66,27 @@ void buildHeaderPcm(BuildContext &context, File &file) {
 }
 
 void buildSysHeaderPcm(BuildContext &context, File &file) {
-    context.run(file,
-                context.common(),
-                "-xc++-system-header --precompile",
-                file.src->fullPath(),
-                " -o ",
-                file.fullPath(),
-                "-Wno-pragma-system-header-outside-header",
-                "-Wno-user-defined-literals");
+    if (true) {
+        context.run(file,
+                    context.common(),
+                    "-xc++-system-header --precompile",
+                    file.src->fullPath(),
+                    " -o ",
+                    file.fullPath(),
+                    "-Wno-pragma-system-header-outside-header",
+                    "-Wno-user-defined-literals");
+    }
+    else {
+
+        context.run(file,
+                    context.common(),
+                    "-fmodule-header=system -xc++-header",
+                    file.src->fullPath().stem(),
+                    " -o ",
+                    file.fullPath(),
+                    "-Wno-pragma-system-header-outside-header",
+                    "-Wno-user-defined-literals");
+    }
 }
 
 BuildContext buildContext() {
