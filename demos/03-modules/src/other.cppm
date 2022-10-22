@@ -1,8 +1,8 @@
 module;
 
-#include <string>
-
 export module other;
+
+import <iostream>;
 
 export import other2;
 

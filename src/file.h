@@ -40,7 +40,6 @@ struct File {
 
     std::filesystem::path path;
     std::filesystem::path fullPath;
-    std::filesystem::path alias;
     Type type = Unknown;
     std::vector<File *> dependencies;
     File *src = nullptr;
@@ -81,7 +80,6 @@ inline void to_json(nlohmann::json &j, const File &file) {
         {"src", file.src},
         {"type", file.type},
         {"buildType", file.buildType},
-        {"alias", file.alias},
     };
 }
 

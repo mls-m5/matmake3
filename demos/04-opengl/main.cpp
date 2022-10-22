@@ -1,6 +1,5 @@
 import <GL/gl.h>;
-#include <GL/glext.h>
-#include <iostream>
+import <iostream>;
 
 int main(int argc, char *argv[]) {
 

@@ -1,5 +1,5 @@
-#include <iostream>
 
+import <iostream>;
 import other;
 
 int main() {

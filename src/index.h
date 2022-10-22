@@ -79,14 +79,12 @@ struct Index {
         auto fullPath = libcHeaders / path;
         if (std::filesystem::exists(fullPath)) {
             files.push_back(std::make_unique<File>(path, fullPath, type(path)));
-            files.back()->alias = fullPath;
             return files.back().get();
         }
 
         fullPath = "/usr/include" / path;
         if (std::filesystem::exists(fullPath)) {
             files.push_back(std::make_unique<File>(path, fullPath, type(path)));
-            files.back()->alias = fullPath;
             return files.back().get();
         }
         return nullptr;
