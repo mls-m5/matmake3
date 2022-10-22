@@ -1,9 +1,10 @@
 #pragma once
 
-#include "filter.h"
+#include "buildpaths.h"
 #include "nlohmann/json.hpp"
 #include "uniqueid.h"
 #include <filesystem>
+#include <ostream>
 #include <vector>
 
 struct File {
@@ -16,8 +17,9 @@ struct File {
     };
 
     ~File() = default;
-    File(std::filesystem::path p, Type type)
+    File(std::filesystem::path p, std::filesystem::path fullPath, Type type)
         : path{std::move(p)}
+        , fullPath{std::move(fullPath)}
         , type{type} {}
 
     File(const File &) = delete;
@@ -29,35 +31,15 @@ struct File {
         return type == Source;
     }
 
-    std::filesystem::path fullPath() const {
-        if (!alias.empty()) {
-            return alias;
-        }
-
-        auto cachePath = "build/.mm3/default";
-        auto outPath = "build/default";
-
-        switch (type) {
-        case Source:
-        case Header:
-            return path;
-        case Intermediate:
-            return cachePath / path;
-        case Output:
-            return outPath / path;
-        default:
-            throw std::runtime_error{"invalid file " + path.string()};
-        }
-    }
-
     // Where to put file if it were in the same path
-    std::filesystem::path sameDir(std::filesystem::path path) {
+    std::filesystem::path sameDir(std::filesystem::path path) const {
         return this->path.parent_path() / path.filename();
     }
 
     friend void to_json(nlohmann::json &j, const File &file);
 
     std::filesystem::path path;
+    std::filesystem::path fullPath;
     std::filesystem::path alias;
     Type type = Unknown;
     std::vector<File *> dependencies;
@@ -106,10 +88,30 @@ inline void to_json(nlohmann::json &j, const std::unique_ptr<File> &f) {
     to_json(j, *f);
 }
 
+inline std::filesystem::path fullPath(const BuildPaths &paths,
+                                      const std::filesystem::path &path,
+                                      File::Type type) {
+    //    if (!file.alias.empty()) {
+    //        return file.alias;
+    //    }
+
+    switch (type) {
+    case File::Source:
+    case File::Header:
+        return path;
+    case File::Intermediate:
+        return paths.cache / path;
+    case File::Output:
+        return paths.out / path;
+    default:
+        throw std::runtime_error{"invalid file " + path.string()};
+    }
+}
+
 inline std::ostream &operator<<(std::ostream &stream,
                                 const std::vector<File *> files) {
     for (auto &file : files) {
-        stream << " " << file->fullPath();
+        stream << " " << file->fullPath;
     }
     return stream;
 }

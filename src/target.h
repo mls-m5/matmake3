@@ -1,4 +1,5 @@
 #pragma once
+#include "buildpaths.h"
 #include "file.h"
 #include "index.h"
 #include "nlohmann/json.hpp"
@@ -17,8 +18,9 @@ public:
     Target &operator=(const Target &) = delete;
     Target &operator=(Target &&) = delete;
 
-    Target(std::string name, Index &index)
-        : _index{&index} {
+    Target(std::string name, Index &index, const BuildPaths &paths)
+        : _index{&index}
+        , _paths{paths} {
         _output = createIntermediateFile(name);
         _output->type = File::Output;
     }
@@ -66,7 +68,10 @@ public:
 
     // Create temporary file that can be removed after compilation
     File *createIntermediateFile(std::filesystem::path path) {
-        auto file = std::make_unique<File>(path, File::Intermediate);
+        auto file =
+            std::make_unique<File>(path,
+                                   fullPath(_paths, path, File::Intermediate),
+                                   File::Intermediate);
         _files.push_back(file.get());
         _index->files.push_back(std::move(file));
         return _index->files.back().get();
@@ -104,6 +109,11 @@ public:
         return _includes;
     }
 
+    // Files used by this target
+    const auto &files() const {
+        return _files;
+    }
+
 private:
     Index *_index;
 
@@ -113,4 +123,5 @@ private:
     std::string _name = "main";
 
     File *_output = nullptr;
+    const BuildPaths &_paths;
 };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "buildpaths.h"
 #include "commandlisit.h"
 #include "file.h"
 #include <functional>
@@ -18,8 +19,9 @@ using BuildFMap =
 // Rules how to build each file
 // Might be replaced by some json template magick later
 struct BuildContext {
-    BuildContext(BuildFMap map)
-        : map{std::move(map)} {}
+    BuildContext(BuildFMap map, const BuildPaths &paths)
+        : map{std::move(map)}
+        , _paths{paths} {}
 
     BuildFMap map;
 
@@ -31,50 +33,17 @@ struct BuildContext {
         return compiler + " " + flags;
     }
 
-    void build(File &file) {
-        if (file.isSource() || (!file.src && file.dependencies.empty())) {
-            return;
-        }
-        if (file.isBuilt) {
-            return;
-        }
-
-        buildDeps(file);
-        if (file.src) {
-            build(*file.src);
-        }
-
-        std::cout << "prepare " << file.fullPath().filename().string()
-                  << std::endl;
-
-        auto buildType = file.buildType;
-
-        auto ext = file.path.extension();
-
-        if (buildType.empty()) {
-            buildType = ext;
-        }
-
-        try {
-            auto &f = map.at(buildType);
-            f(*this, file);
-        }
-        catch (std::out_of_range &e) {
-            throw std::runtime_error{"no rule for type " + buildType};
-        }
-
-        file.isBuilt = true;
-    }
+    void build(File &file);
 
     template <typename... Args>
-    void run(const File &file, Args... args) {
-        auto ss = std::ostringstream{};
-        ((ss << args << " "), ...);
-        _commandList.commands.push_back({ss.str(), file});
+    void run(const File &file, Args... args);
+
+    const CommandList &commandList() const {
+        return _commandList;
     }
 
-    const CommandList &commandList() {
-        return _commandList;
+    const auto &paths() const {
+        return _paths;
     }
 
 private:
@@ -88,4 +57,46 @@ private:
     }
 
     CommandList _commandList;
+    const BuildPaths &_paths;
 };
+
+inline void BuildContext::build(File &file) {
+    if (file.isSource() || (!file.src && file.dependencies.empty())) {
+        return;
+    }
+    if (file.isBuilt) {
+        return;
+    }
+
+    buildDeps(file);
+    if (file.src) {
+        build(*file.src);
+    }
+
+    std::cout << "prepare " << file.path.filename() << std::endl;
+
+    auto buildType = file.buildType;
+
+    auto ext = file.path.extension();
+
+    if (buildType.empty()) {
+        buildType = ext;
+    }
+
+    try {
+        auto &f = map.at(buildType);
+        f(*this, file);
+    }
+    catch (std::out_of_range &e) {
+        throw std::runtime_error{"no rule for type " + buildType};
+    }
+
+    file.isBuilt = true;
+}
+
+template <typename... Args>
+void BuildContext::run(const File &file, Args... args) {
+    auto ss = std::ostringstream{};
+    ((ss << args << " "), ...);
+    _commandList.add(ss.str(), file, file.fullPath);
+}

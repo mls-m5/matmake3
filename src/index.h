@@ -27,9 +27,9 @@ struct Index {
                 it.disable_recursion_pending();
             }
             if (it->is_regular_file() && shouldInclude(it->path())) {
-                files.push_back(std::make_unique<File>(
-                    std::filesystem::relative(it->path(), "."),
-                    type(it->path())));
+                auto rpath = std::filesystem::relative(it->path(), ".");
+                files.push_back(
+                    std::make_unique<File>(rpath, rpath, type(it->path())));
             }
         }
     }
@@ -78,14 +78,14 @@ struct Index {
 
         auto fullPath = libcHeaders / path;
         if (std::filesystem::exists(fullPath)) {
-            files.push_back(std::make_unique<File>(path, type(path)));
+            files.push_back(std::make_unique<File>(path, fullPath, type(path)));
             files.back()->alias = fullPath;
             return files.back().get();
         }
 
         fullPath = "/usr/include" / path;
         if (std::filesystem::exists(fullPath)) {
-            files.push_back(std::make_unique<File>(path, type(path)));
+            files.push_back(std::make_unique<File>(path, fullPath, type(path)));
             files.back()->alias = fullPath;
             return files.back().get();
         }

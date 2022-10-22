@@ -1,52 +1,30 @@
 #pragma once
 
 #include "file.h"
-#include <iostream>
-#include <sstream>
+#include <filesystem>
 #include <string>
 #include <vector>
 
-// inline bool dryRun = false;
-
-// struct CommandStream : public std::ostringstream {
-//     CommandStream(struct CommandList &list, const File &file)
-//         : list{list}
-//         , file{file} {}
-
-//    ~CommandStream();
-
-//    //    void run() {
-//    //        std::cout << str() << std::endl;
-//    //        if (dryRun) {
-//    //        }
-//    //        else {
-//    //            if (std::system(str().c_str())) {
-//    //                throw std::runtime_error{"failed with command: " +
-//    str()};
-//    //            }
-//    //        }
-//    //    }
-
-//    CommandList &list;
-//    const File &file;
-//};
-
 struct CommandList {
     struct Command {
-        std::string name;
+        std::string command;
         const File &file;
+        std::filesystem::path out;
     };
 
-    std::vector<Command> commands;
+    void add(std::string command,
+             const File &file,
+             std::filesystem::path path) {
+        _commands.push_back({std::move(command), file, path});
+    }
 
-    //    CommandStream operator()(const File &file) {
-    //        return CommandStream{*this, file};
-    //    }
+    auto &commands() const {
+        return _commands;
+    }
+
+    std::filesystem::path buildPath;
+    std::filesystem::path projectPath;
+
+private:
+    std::vector<Command> _commands;
 };
-
-// inline CommandStream::~CommandStream() {
-//     list.commands.push_back(CommandList::Command{
-//         .name = str(),
-//         .file = file,
-//     });
-// }

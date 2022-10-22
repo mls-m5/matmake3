@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
     std::ios::sync_with_stdio(false);
 
     auto index = std::make_unique<Index>();
-    auto target = createRecursive(*index);
+    auto target = createRecursive(*index, settings.paths);
 
     try {
         build(*target, settings);

@@ -1,5 +1,6 @@
 #pragma once
 
-#include "index.h"
+#include "buildcontext.h"
+#include "commandlisit.h"
 
-void writeNinjaFile(const Index &index);
+void writeNinjaFile(const BuildContext &context, const CommandList &list);

@@ -1,8 +1,10 @@
 #include "build.h"
 #include "buildcontext.h"
+#include "buildpaths.h"
 #include "commandlisit.h"
 #include <cstdlib>
 #include <iostream>
+#include <ostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -10,12 +12,13 @@
 
 namespace {
 
-std::string pcmDepString(File &file) {
+std::string pcmDepString(const BuildContext &context, const File &file) {
     auto depss = std::ostringstream{};
 
     for (auto dep : file.dependencies) {
-        if (dep->fullPath().extension() == ".pcm") {
-            depss << " -fmodule-file=" << dep->fullPath();
+        const auto fullPath = dep->fullPath;
+        if (fullPath.extension() == ".pcm") {
+            depss << " -fmodule-file=" << fullPath;
         }
     }
 
@@ -33,10 +36,10 @@ std::string flags(Target &target) {
 void buildObj(BuildContext &context, File &file) {
     context.run(file,
                 context.common(),
-                file.src->fullPath(),
-                pcmDepString(file),
+                file.src->fullPath,
+                pcmDepString(context, file),
                 " -c -o ",
-                file.fullPath());
+                file.fullPath);
 }
 
 void buildExe(BuildContext &context, File &file) {
@@ -45,24 +48,24 @@ void buildExe(BuildContext &context, File &file) {
                 context.linkFlags,
                 file.dependencies,
                 " -o ",
-                file.fullPath());
+                file.fullPath);
 }
 
 void buildPcm(BuildContext &context, File &file) {
     context.run(file,
                 context.common(),
-                file.src->fullPath(),
-                pcmDepString(file),
+                file.src->fullPath,
+                pcmDepString(context, file),
                 " --precompile -o ",
-                file.fullPath());
+                file.fullPath);
 }
 
 void buildHeaderPcm(BuildContext &context, File &file) {
     context.run(file,
                 context.common(),
-                file.src->fullPath(),
+                file.src->fullPath,
                 " -fmodule-header -o ",
-                file.fullPath());
+                file.fullPath);
 }
 
 void buildSysHeaderPcm(BuildContext &context, File &file) {
@@ -70,9 +73,9 @@ void buildSysHeaderPcm(BuildContext &context, File &file) {
         context.run(file,
                     context.common(),
                     "-xc++-system-header --precompile",
-                    file.src->fullPath(),
+                    file.src->fullPath,
                     " -o ",
-                    file.fullPath(),
+                    file.fullPath,
                     "-Wno-pragma-system-header-outside-header",
                     "-Wno-user-defined-literals");
     }
@@ -81,22 +84,25 @@ void buildSysHeaderPcm(BuildContext &context, File &file) {
         context.run(file,
                     context.common(),
                     "-fmodule-header=system -xc++-header",
-                    file.src->fullPath().stem(),
+                    file.src->fullPath.stem(),
                     " -o ",
-                    file.fullPath(),
+                    file.fullPath,
                     "-Wno-pragma-system-header-outside-header",
                     "-Wno-user-defined-literals");
     }
 }
 
-BuildContext buildContext() {
-    auto context = BuildContext{{
-        {".o", buildObj},
-        {"exe", buildExe},
-        {".pcm", buildPcm},
-        {".h.pcm", buildHeaderPcm},
-        {"sys.h.pcm", buildSysHeaderPcm},
-    }};
+BuildContext buildContext(const BuildPaths &paths) {
+    auto context = BuildContext{
+        {
+            {".o", buildObj},
+            {"exe", buildExe},
+            {".pcm", buildPcm},
+            {".h.pcm", buildHeaderPcm},
+            {"sys.h.pcm", buildSysHeaderPcm},
+        },
+        paths,
+    };
 
     return context;
 }
@@ -106,30 +112,29 @@ BuildContext buildContext() {
 void build(Target &target, const Settings &settings) {
     auto out = target.output();
 
-    auto context = buildContext();
+    auto context = buildContext(settings.paths);
     context.flags += flags(target);
     context.linkFlags += settings.linkFlags;
 
-    createBuildPaths(target.index());
+    createBuildPaths(target, context);
     context.build(*out);
 
-    for (auto &command : context.commandList().commands) {
-        std::cout << "build " << command.file.fullPath().filename()
-                  << std::endl;
-        std::cout << command.name << std::endl;
-        if (std::system(command.name.c_str())) {
-            throw std::runtime_error{"failed with command: " + command.name};
+    for (auto &command : context.commandList().commands()) {
+        std::cout << "build " << command.file.fullPath.filename() << std::endl;
+        std::cout << command.command << std::endl;
+        if (std::system(command.command.c_str())) {
+            throw std::runtime_error{"failed with command: " + command.command};
         }
     }
 }
 
-void createBuildPaths(const Index &index) {
+void createBuildPaths(const Target &target, BuildContext &context) {
     // unordered map does not seem to support filesystem paths
     auto dirs = std::unordered_set<std::string>{};
 
-    for (auto &file : index.files) {
+    for (auto &file : target.files()) {
         if (!file->isSource()) {
-            dirs.insert(file->fullPath().parent_path().string());
+            dirs.insert(file->fullPath.parent_path().string());
         }
     }
 
@@ -137,6 +142,7 @@ void createBuildPaths(const Index &index) {
         if (dir.empty()) {
             continue;
         }
+        std::cout << "creating directory " << dir << std::endl;
         std::filesystem::create_directories(dir);
     }
 }

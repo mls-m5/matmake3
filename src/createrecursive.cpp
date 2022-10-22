@@ -1,4 +1,5 @@
 #include "createrecursive.h"
+#include "buildpaths.h"
 #include "deps.h"
 #include <filesystem>
 #include <iostream>
@@ -158,8 +159,8 @@ File *createPcmHeaderFile(Target &target,
 
 } // namespace
 
-std::unique_ptr<Target> createRecursive(Index &index) {
-    auto target = std::make_unique<Target>("main", index);
+std::unique_ptr<Target> createRecursive(Index &index, const BuildPaths &paths) {
+    auto target = std::make_unique<Target>("main", index, paths);
 
     target->registerFunction(".o", createObjectFile);
     target->registerFunction(".pcm", createPcmFile);

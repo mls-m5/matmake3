@@ -1,12 +1,13 @@
 #pragma once
 
+#include "buildpaths.h"
 #include <iostream>
 #include <string>
 #include <vector>
 
 struct Settings {
-
     std::string linkFlags;
+    BuildPaths paths;
 
     Settings(int argc, char **argv) {
         auto args = std::vector<std::string>(argv + 1, argv + argc);
