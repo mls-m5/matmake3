@@ -1,5 +1,5 @@
 // A workaround when you want to import iostream and string is to only import
-// string
+// string, otherwise clang will throw a mysterious error
 
 import <iostream>;
 // import <string>;
