@@ -25,7 +25,8 @@ void writeCompilationDatabase(const BuildPaths &paths,
     for (auto &command : list.commands()) {
         if (command.file.src) {
             entries.push_back(DatabaseEntry{
-                .file = std::filesystem::absolute(command.file.src->fullPath),
+                .file = std::filesystem::absolute(command.file.src->fullPath)
+                            .string(),
                 .directory =
                     std::filesystem::absolute(std::filesystem::current_path())
                         .string(),
@@ -36,8 +37,7 @@ void writeCompilationDatabase(const BuildPaths &paths,
 
     auto json = nlohmann::json{entries};
 
-    auto jsonPath =
-        std::filesystem::path{paths.cache / "compile_commands.json"};
+    auto jsonPath = std::filesystem::path{paths.out / "compile_commands.json"};
 
     std::cout << "writing to file " << jsonPath << std::endl;
 
