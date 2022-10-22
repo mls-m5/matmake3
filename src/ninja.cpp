@@ -1,4 +1,5 @@
 #include "ninja.h"
+#include "buildpaths.h"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -16,11 +17,11 @@ void printEscaped(std::ostream &stream, std::string_view str) {
     }
 }
 
-void writeNinjaFile(const BuildContext &context, const CommandList &list) {
+void writeNinjaFile(const BuildPaths &paths, const CommandList &list) {
 
-    std::filesystem::create_directories(context.paths().cache);
-    auto ninjaPath = std::filesystem::path{
-        std::filesystem::path{context.paths().cache} / "build.ninja"};
+    std::filesystem::create_directories(paths.cache);
+    auto ninjaPath = std::filesystem::path{std::filesystem::path{paths.cache} /
+                                           "build.ninja"};
     {
         auto file = std::ofstream{ninjaPath};
 

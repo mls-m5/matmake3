@@ -1,6 +1,7 @@
 #pragma once
 
 #include "buildpaths.h"
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -17,8 +18,11 @@ struct Settings {
             auto arg = args.at(i);
 
             if (arg.front() != '-') {
-                std::cerr << "invalid argument " << arg << "\n\n";
-                printHelp(1);
+                if (!std::filesystem::is_directory(arg)) {
+                    std::cerr << "invalid argument " << arg << "\n\n";
+                    printHelp(1);
+                }
+                std::filesystem::current_path(arg);
             }
             else if (arg == "--help" || arg == "-h") {
                 printHelp();

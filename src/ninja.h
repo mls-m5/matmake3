@@ -1,6 +1,6 @@
 #pragma once
 
-#include "buildcontext.h"
+#include "buildpaths.h"
 #include "commandlisit.h"
 
-void writeNinjaFile(const BuildContext &context, const CommandList &list);
+void writeNinjaFile(const BuildPaths &paths, const CommandList &list);

@@ -2,6 +2,7 @@
 #include "buildcontext.h"
 #include "buildpaths.h"
 #include "commandlisit.h"
+#include "compilationdatabase.h"
 #include "ninja.h"
 #include <cstdlib>
 #include <iostream>
@@ -120,6 +121,8 @@ void build(Target &target, const Settings &settings) {
     createBuildPaths(target, context);
     context.build(*out);
 
+    writeCompilationDatabase(context.paths(), context.commandList());
+
     if (settings.shouldBuildNative) {
         for (auto &command : context.commandList().commands()) {
             std::cout << "build " << command.file.fullPath.filename()
@@ -133,7 +136,7 @@ void build(Target &target, const Settings &settings) {
         return;
     }
 
-    writeNinjaFile(context, context.commandList());
+    writeNinjaFile(context.paths(), context.commandList());
 }
 
 void createBuildPaths(const Target &target, BuildContext &context) {

@@ -14,6 +14,7 @@ add_executable(
     src/createrecursive.cpp
     src/deps.cpp
     src/build.cpp
+    src/compilationdatabas.cpp
     )
 
 target_compile_features(
