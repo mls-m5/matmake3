@@ -1,5 +1,5 @@
 
-// export module base;
+export module base;
 
 export struct Base {
     virtual void hello() = 0;

@@ -1,11 +1,8 @@
 
 export module derived;
 
-// export import base;
-//  import <iostream>;
 import <iostream>;
-
-#include "base.cppm"
+export import base;
 
 export class Derived : public Base {
 public:
