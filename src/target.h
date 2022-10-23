@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <functional>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -37,13 +38,21 @@ public:
             type = type.empty() ? path.extension().string() : type;
             if (auto func = _createFunctions.find(type);
                 func != _createFunctions.end()) {
-                auto file = func->second(*this, path, requestName);
+                auto file = [&]() {
+                    try {
+                        return func->second(*this, path, requestName);
+                    }
+                    catch (std::runtime_error &e) {
+                        throw std::runtime_error{"in " + path.string() + " - " +
+                                                 requestName.string() + ":\n" +
+                                                 e.what()};
+                    }
+                }();
 
                 if (!file) {
                     throw std::runtime_error{"could not create file " +
                                              path.string()};
                 }
-
                 return file;
             }
         }
