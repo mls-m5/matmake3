@@ -20,7 +20,13 @@ std::string pcmDepString(const BuildContext &context, const File &file) {
     for (auto dep : file.dependencies) {
         const auto fullPath = dep->fullPath;
         if (fullPath.extension() == ".pcm") {
-            depss << " -fmodule-file=" << fullPath;
+            if (false) {
+                depss << " -fmodule-file=" << fullPath.stem().string() << "="
+                      << fullPath;
+            }
+            else {
+                depss << " -fmodule-file=" << fullPath;
+            }
         }
     }
 
@@ -79,7 +85,8 @@ void buildSysHeaderPcm(BuildContext &context, File &file) {
         context.run(file,
                     context.common(),
                     "-xc++-system-header --precompile",
-                    file.src->fullPath,
+                    //                    file.src->fullPath,
+                    file.src->fullPath.stem().string(),
                     " -o ",
                     file.fullPath,
                     "-Wno-pragma-system-header-outside-header",

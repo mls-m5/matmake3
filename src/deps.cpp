@@ -13,6 +13,7 @@ std::vector<std::string> parseModuleDeps(std::filesystem::path path) {
     auto importStr = "import "sv;
     auto moduleStr = "module "sv;
     auto exportImportStr = "export import "sv;
+    auto includeStr = "#include "sv;
 
     auto findImport = [](const std::string &line,
                          std::string_view type) -> std::string {
@@ -45,6 +46,10 @@ std::vector<std::string> parseModuleDeps(std::filesystem::path path) {
             continue;
         }
         if (auto dep = findImport(line, exportImportStr); !dep.empty()) {
+            deps.push_back(dep);
+            continue;
+        }
+        if (auto dep = findImport(line, includeStr); !dep.empty()) {
             deps.push_back(dep);
             continue;
         }
