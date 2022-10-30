@@ -46,7 +46,7 @@ void buildObj(BuildContext &context, File &file) {
                 context.common(),
                 file.src->fullPath,
                 pcmDepString(context, file),
-                " -c -o ",
+                "-c -o",
                 file.fullPath);
 }
 
@@ -55,7 +55,7 @@ void buildExe(BuildContext &context, File &file) {
                 context.common(),
                 context.linkFlags,
                 file.dependencies,
-                " -o ",
+                "-o",
                 file.fullPath);
 }
 
@@ -66,7 +66,7 @@ void buildPcm(BuildContext &context, File &file) {
                 pcmDepString(context, file),
                 "-MD -MF",
                 file.depFile(),
-                " --precompile -o ",
+                "--precompile -o",
                 file.fullPath);
 }
 
@@ -76,7 +76,7 @@ void buildHeaderPcm(BuildContext &context, File &file) {
                 file.src->fullPath,
                 "-MD -MF",
                 file.depFile(),
-                " -fmodule-header -o ",
+                "-fmodule-header -o",
                 file.fullPath);
 }
 
@@ -87,7 +87,7 @@ void buildSysHeaderPcm(BuildContext &context, File &file) {
                     "-xc++-system-header --precompile",
                     //                    file.src->fullPath,
                     file.src->fullPath.stem().string(),
-                    " -o ",
+                    "-o",
                     file.fullPath,
                     "-Wno-pragma-system-header-outside-header",
                     "-Wno-user-defined-literals");
@@ -98,7 +98,7 @@ void buildSysHeaderPcm(BuildContext &context, File &file) {
                     context.common(),
                     "-fmodule-header=system -xc++-header",
                     file.src->fullPath.stem(),
-                    " -o ",
+                    "-o",
                     file.fullPath,
                     "-Wno-pragma-system-header-outside-header",
                     "-Wno-user-defined-literals");
