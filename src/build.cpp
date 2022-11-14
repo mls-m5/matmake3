@@ -20,7 +20,8 @@ std::string pcmDepString(const BuildContext &context, const File &file) {
     for (auto dep : file.dependencies) {
         const auto fullPath = dep->fullPath;
         if (fullPath.extension() == ".pcm") {
-            if (false) {
+            if (false) { // Should be used for headers (maybe everything when it
+                         // works)
                 depss << " -fmodule-file=" << fullPath.stem().string() << "="
                       << fullPath;
             }
