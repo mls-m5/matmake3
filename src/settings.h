@@ -8,8 +8,10 @@
 
 struct Settings {
     std::string linkFlags;
+    std::string cxxflags;
     BuildPaths paths;
     bool shouldBuildNative = false;
+    int numCores = -1;
 
     Settings(int argc, char **argv) {
         auto args = std::vector<std::string>(argv + 1, argv + argc);
@@ -30,6 +32,15 @@ struct Settings {
             else if (arg == "--link") {
                 linkFlags += " " + args.at(++i);
             }
+            else if (arg == "-j") {
+                numCores = std::stoi(args.at(++i));
+            }
+            else if (arg == "--debug") {
+                cxxflags += " -g";
+            }
+            else if (arg == "--flag") {
+                cxxflags += " " + args.at(++i);
+            }
             else {
                 std::cerr << "invalid argument " << arg << "\n\n";
                 printHelp(1);
@@ -46,6 +57,9 @@ args
 
 --help -h                 print this text
 --link                    extra link flags
+--debug                   add debug flags to build
+--flag                    add build flags
+-j                        number of process to use when building
 
 
 )_";

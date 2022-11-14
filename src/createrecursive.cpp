@@ -13,8 +13,8 @@ File *requestPcm(Target &target, std::string dep) {
     auto name = dep;
     auto type = ".pcm";
     if (dep.front() == '<' || dep.front() == '"') {
-        auto path = std::filesystem::path{name.substr(1, name.size() - 2)}
-                        .replace_extension(".pcm");
+        auto path =
+            std::filesystem::path{name.substr(1, name.size() - 2) + ".pcm"};
         name = path.string();
         type = ".h.pcm";
     }
@@ -59,7 +59,7 @@ File *createObjectFile(Target &target,
                        std::filesystem::path from) {
     {
         auto srcPath = path;
-        srcPath.replace_extension(".cppm");
+        srcPath.replace_extension("").replace_extension(".cppm");
         auto src = target.find(srcPath);
 
         if (src) {
@@ -67,8 +67,9 @@ File *createObjectFile(Target &target,
         }
     }
 
+    // Try with .cpp
     auto srcPath = path;
-    srcPath.replace_extension(".cpp");
+    srcPath.replace_extension("").replace_extension(".cpp");
     auto src = target.find(srcPath);
 
     path = src->sameDir(path);
@@ -107,7 +108,7 @@ File *createPcmFile(Target &target,
 
     {
         auto objPath = path;
-        objPath.replace_extension(".o");
+        objPath += ".o";
         auto objFile = target.find(objPath);
         if (objFile) {
             throw std::runtime_error{
@@ -167,8 +168,7 @@ std::unique_ptr<Target> createRecursive(Index &index, const BuildPaths &paths) {
     target->registerFunction(".h.pcm", createPcmHeaderFile);
 
     for (auto src : index.findAll(".cpp")) {
-        auto objSrc = src->path;
-        objSrc.replace_extension(".o");
+        auto objSrc = std::filesystem::path{src->path.string() + ".o"};
         auto obj = target->requestObject(objSrc, src->path);
         target->addObject(obj);
     }

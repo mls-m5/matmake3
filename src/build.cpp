@@ -87,7 +87,8 @@ void buildSysHeaderPcm(BuildContext &context, File &file) {
                     context.common(),
                     "-xc++-system-header --precompile",
                     //                    file.src->fullPath,
-                    file.src->fullPath.stem().string(),
+                    //                    file.src->fullPath.stem().string(),
+                    file.src->path.string(),
                     "-o",
                     file.fullPath,
                     "-Wno-pragma-system-header-outside-header",
@@ -129,6 +130,7 @@ void build(Target &target, const Settings &settings) {
     auto context = buildContext(settings.paths);
     context.flags += flags(target);
     context.linkFlags += settings.linkFlags;
+    context.flags += " " + settings.cxxflags;
 
     createBuildPaths(target, context);
     context.build(*out);
