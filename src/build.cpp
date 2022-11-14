@@ -151,6 +151,7 @@ void build(Target &target, const Settings &settings) {
     }
 
     writeNinjaFile(context.paths(), context.commandList());
+    runNinjaFile(context.paths());
 }
 
 void createBuildPaths(const Target &target, BuildContext &context) {

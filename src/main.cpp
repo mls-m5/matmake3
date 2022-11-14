@@ -19,10 +19,4 @@ int main(int argc, char *argv[]) {
         std::cerr << e.what() << std::endl;
         return 1;
     }
-
-    //    writeNinjaFile(*index);
-    //    return std::system(
-    //        ("ninja -f " +
-    //         (std::filesystem::path{cachePath} / "build.ninja").string())
-    //            .c_str());
 }

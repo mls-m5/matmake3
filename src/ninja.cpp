@@ -6,6 +6,8 @@
 #include <sstream>
 #include <stdexcept>
 
+namespace {
+
 void printEscaped(std::ostream &stream, std::string_view str) {
     for (auto c : str) {
         if (c == ' ') {
@@ -17,11 +19,17 @@ void printEscaped(std::ostream &stream, std::string_view str) {
     }
 }
 
+auto ninjaPath(const BuildPaths &paths) {
+    return std::filesystem::path{std::filesystem::path{paths.cache} /
+                                 "build.ninja"};
+}
+
+} // namespace
+
 void writeNinjaFile(const BuildPaths &paths, const CommandList &list) {
 
     std::filesystem::create_directories(paths.cache);
-    auto ninjaPath = std::filesystem::path{std::filesystem::path{paths.cache} /
-                                           "build.ninja"};
+    auto ninjaPath = ::ninjaPath(paths);
     {
         auto file = std::ofstream{ninjaPath};
 
@@ -50,12 +58,12 @@ void writeNinjaFile(const BuildPaths &paths, const CommandList &list) {
             file << "\n  cmd = " << command.command << "\n\n";
         }
     }
+}
 
-    {
-        auto ss = std::ostringstream{};
-        ss << "ninja -f " << ninjaPath;
-        if (std::system(ss.str().c_str())) {
-            throw std::runtime_error{"ninja build failed"};
-        }
+void runNinjaFile(const BuildPaths &paths) {
+    auto ss = std::ostringstream{};
+    ss << "ninja -f " << ninjaPath(paths) << " 2>&1";
+    if (std::system(ss.str().c_str())) {
+        throw std::runtime_error{"ninja build failed"};
     }
 }
