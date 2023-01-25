@@ -168,7 +168,7 @@ void findFilesWithoutBuildScript(const Index &index, Target &target) {
 
     {
         auto includes = std::vector<std::filesystem::path>{};
-        for (auto it : std::filesystem::recursive_directory_iterator{"."}) {
+        for (auto &it : std::filesystem::recursive_directory_iterator{"."}) {
             if (it.path().filename() == "include") {
                 includes.push_back(std::filesystem::relative(it.path(), "."));
             }

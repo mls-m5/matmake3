@@ -16,6 +16,7 @@ add_executable(
     src/build.cpp
     src/compilationdatabase.cpp
     src/luascript.cpp
+    src/index.cpp
     )
 
 target_compile_features(
@@ -41,9 +42,27 @@ FetchContent_Declare(
     URL https://github.com/nlohmann/json/archive/refs/tags/v3.11.2.tar.gz)
 FetchContent_MakeAvailable(json)
 
+file(
+    GLOB
+    LUA_FILES
+    "lib/lua/*.c"
+    )
+
+add_library(
+    lua
+    ${LUA_FILES}
+    )
+
+target_include_directories(
+    lua
+    PUBLIC
+    lib/lua
+    )
+
 target_link_libraries(
     matmake3
     PUBLIC
     nlohmann_json
     sol2
+    lua
     )

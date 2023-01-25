@@ -2,6 +2,7 @@
 
 #include "file.h"
 #include "filter.h"
+#include "glob.h"
 #include "nlohmann/json.hpp"
 #include <filesystem>
 #include <memory>
@@ -49,6 +50,8 @@ struct Index {
 
         return files;
     }
+
+    std::vector<File *> findGlob(std::string glob) const;
 
     File *findSystemFile(std::filesystem::path path) {
         // TODO: Do something more generic
