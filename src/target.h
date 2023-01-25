@@ -141,12 +141,25 @@ public:
         return _files;
     }
 
+    void addLink(std::string name) {
+        _externalLibraries.push_back(name);
+    }
+
+    const std::vector<std::string> &externalLibraries() const {
+        return _externalLibraries;
+    }
+
+    void name(std::string name) {
+        _name = name;
+    }
+
 private:
     Index *_index;
 
     std::vector<File *> _files;
     std::vector<std::filesystem::path> _includes;
     std::unordered_map<std::string, CreateT> _createFunctions;
+    std::vector<std::string> _externalLibraries;
     std::string _name = "main";
     std::string _flags = "";
 

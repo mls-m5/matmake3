@@ -36,13 +36,27 @@ std::string pcmDepString(const BuildContext &context, const File &file) {
 
 std::string flags(Target &target) {
     auto ss = std::ostringstream{};
-    for (auto i : target.includes()) {
+    for (auto &i : target.includes()) {
         ss << " -I" << i;
     }
 
     if (!target.flags().empty()) {
         ss << " " << target.flags();
     }
+    return ss.str();
+}
+
+std::string link(Target &target) {
+    if (target.externalLibraries().empty()) {
+        return "";
+    }
+
+    auto ss = std::ostringstream{};
+    for (auto &lib : target.externalLibraries()) {
+        // TODO: Handle different compilers syntax
+        ss << " -l" << lib;
+    }
+
     return ss.str();
 }
 
@@ -133,8 +147,10 @@ void build(Target &target, const Settings &settings) {
 
     auto context = buildContext(settings.paths);
     context.flags += flags(target);
-    context.linkFlags += settings.linkFlags;
     context.flags += " " + settings.cxxflags;
+
+    context.linkFlags += link(target);
+    context.linkFlags += " " + settings.linkFlags;
 
     createBuildPaths(target, context);
     context.build(*out);

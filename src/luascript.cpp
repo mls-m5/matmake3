@@ -50,6 +50,14 @@ void include(Target &target, sol::object path) {
     }
 }
 
+void name(Target &target, sol::object name) {
+    if (!name) {
+        return;
+    }
+
+    target.name(name.as<std::string>());
+}
+
 void flags(Target &target, sol::object f) {
     if (!f) {
         return;
@@ -61,6 +69,20 @@ void flags(Target &target, sol::object f) {
     else if (f.is<sol::table>()) {
         for (auto flag : f.as<sol::table>()) {
             flags(target, flag.second);
+        }
+    }
+}
+
+void link(Target &target, sol::object l) {
+    if (!l) {
+        return;
+    }
+    if (l.is<std::string>()) {
+        target.addLink(l.as<std::string>());
+    }
+    else if (l.is<sol::table>()) {
+        for (auto flag : l.as<sol::table>()) {
+            link(target, flag.second);
         }
     }
 }
@@ -79,6 +101,8 @@ void runBuildScript(const BuildPaths &paths,
         src(target, index, value.get<sol::object>("src"));
         include(target, value.get<sol::object>("include"));
         flags(target, value.get<sol::object>("flags"));
+        name(target, value.get<sol::object>("name"));
+        link(target, value.get<sol::object>("link"));
     });
 
     auto script = lua.load_file(paths.buildScript);
