@@ -104,8 +104,6 @@ void buildSysHeaderPcm(BuildContext &context, File &file) {
         context.run(file,
                     context.common(),
                     "-xc++-system-header --precompile",
-                    //                    file.src->fullPath,
-                    //                    file.src->fullPath.stem().string(),
                     file.src->path.string(),
                     "-o",
                     file.fullPath,
@@ -170,7 +168,7 @@ void build(Target &target, const Settings &settings) {
     }
 
     writeNinjaFile(context.paths(), context.commandList());
-    runNinjaFile(context.paths());
+    runNinjaFile(settings);
 }
 
 void createBuildPaths(const Target &target, BuildContext &context) {
@@ -190,4 +188,8 @@ void createBuildPaths(const Target &target, BuildContext &context) {
         mlog.debug("creating directory", dir);
         std::filesystem::create_directories(dir);
     }
+}
+
+void clean(Target &target, const Settings &settings) {
+    ninjaClean(settings.paths);
 }

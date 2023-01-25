@@ -7,12 +7,20 @@
 #include <vector>
 
 struct Settings {
+
+    enum Command {
+        Build,
+        Clean,
+    };
+
     std::string linkFlags;
     std::string cxxflags;
     BuildPaths paths;
     bool shouldBuildNative = false;
     int numCores = -1;
     bool isVerbose = false;
+
+    Command command = Build;
 
     Settings(int argc, char **argv) {
         auto args = std::vector<std::string>(argv + 1, argv + argc);
@@ -48,6 +56,9 @@ struct Settings {
             else if (arg == "--verbose" || arg == "-v") {
                 isVerbose = true;
             }
+            else if (arg == "--clean") {
+                command = Clean;
+            }
             else {
                 std::cerr << "invalid argument " << arg << "\n\n";
                 printHelp(1);
@@ -58,7 +69,7 @@ struct Settings {
     void printHelp(int returnCode = 0) {
         std::cout << R"_(
 usage:
-matmake3  [--in infile] [--out outfile]
+matmake3
 
 args
 
@@ -69,6 +80,7 @@ args
 -j                        number of process to use when building
 --file -f                 specify path to .mm3 file to use
 --verbose -v              print information of matmakes process
+--clean                   remove all built files
 
 
 )_";

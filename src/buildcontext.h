@@ -27,7 +27,8 @@ struct BuildContext {
     BuildFMap map;
 
     std::string compiler = "clang++-16";
-    std::string flags = "-std=c++20 -stdlib=libc++";
+    std::string flags =
+        "-std=c++20 -stdlib=libc++ -Wno-unused-command-line-argument";
     std::string linkFlags = "";
 
     std::string common() {

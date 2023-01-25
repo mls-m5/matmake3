@@ -8,3 +8,5 @@
 void build(Target &target, const Settings &settings);
 
 void createBuildPaths(const Target &target, BuildContext &context);
+
+void clean(Target &target, const Settings &settings);

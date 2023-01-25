@@ -15,11 +15,17 @@ int main(int argc, char *argv[]) {
     auto index = std::make_unique<Index>();
     auto target = createRecursive(*index, settings.paths);
 
-    try {
-        build(*target, settings);
+    if (settings.command == Settings::Build) {
+        try {
+            build(*target, settings);
+            std::cout << "done...\n";
+        }
+        catch (std::runtime_error &e) {
+            std::cerr << e.what() << std::endl;
+            return 1;
+        }
     }
-    catch (std::runtime_error &e) {
-        std::cerr << e.what() << std::endl;
-        return 1;
+    else if (settings.command) {
+        clean(*target, settings);
     }
 }
