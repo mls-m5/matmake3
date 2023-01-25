@@ -12,6 +12,7 @@ struct Settings {
     BuildPaths paths;
     bool shouldBuildNative = false;
     int numCores = -1;
+    bool isVerbose = false;
 
     Settings(int argc, char **argv) {
         auto args = std::vector<std::string>(argv + 1, argv + argc);
@@ -44,6 +45,9 @@ struct Settings {
             else if (arg == "--file" || arg == "-f") {
                 paths.buildScript = args.at(++i);
             }
+            else if (arg == "--verbose" || arg == "-v") {
+                isVerbose = true;
+            }
             else {
                 std::cerr << "invalid argument " << arg << "\n\n";
                 printHelp(1);
@@ -63,6 +67,8 @@ args
 --debug                   add debug flags to build
 --flag                    add build flags
 -j                        number of process to use when building
+--file -f                 specify path to .mm3 file to use
+--verbose -v              print information of matmakes process
 
 
 )_";

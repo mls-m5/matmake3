@@ -31,12 +31,18 @@ struct File {
         return fullPath.string() + ".d";
     }
 
+    void name(std::string n) {
+        path.replace_filename(n);
+        fullPath.replace_filename(n);
+    }
+
     std::filesystem::path path;
     std::filesystem::path fullPath;
     std::vector<File *> dependencies;
     File *src = nullptr;
     bool isBuilt = false;       // Only used for when building in application
     std::string buildType = ""; // Override file extension
+    bool shouldUseDepFile = false;
 };
 
 inline void to_json(nlohmann::json &j, const File *f) {
@@ -55,6 +61,7 @@ inline void to_json(nlohmann::json &j, const File &file) {
         {"deps", file.dependencies},
         {"src", file.src},
         {"buildType", file.buildType},
+        {"shouldUseDepFile", file.shouldUseDepFile},
     };
 }
 

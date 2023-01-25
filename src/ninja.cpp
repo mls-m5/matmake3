@@ -1,8 +1,8 @@
 #include "ninja.h"
 #include "buildpaths.h"
+#include "log.h"
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -27,7 +27,6 @@ auto ninjaPath(const BuildPaths &paths) {
 } // namespace
 
 void writeNinjaFile(const BuildPaths &paths, const CommandList &list) {
-
     std::filesystem::create_directories(paths.cache);
     auto ninjaPath = ::ninjaPath(paths);
     {
@@ -38,16 +37,22 @@ void writeNinjaFile(const BuildPaths &paths, const CommandList &list) {
                                      " for writing"};
         }
 
-        std::cout << "writing to " << std::filesystem::absolute(ninjaPath)
-                  << std::endl;
+        mlog.debug("writing to", std::filesystem::absolute(ninjaPath));
 
         file << "# Ninja file generated with matmake3\n\n";
         file << "rule run\n";
+        file << "    command = $cmd\n\n";
+        file << "rule run_dep\n";
         file << "    command = $cmd\n";
-        file << "  depfile = $out.d\n\n";
+        file << "    depfile = $out.d\n\n";
 
         for (auto &command : list.commands()) {
-            file << "build " << command.out.string() << ": run ";
+            std::string runCommand = "run";
+            if (command.file.shouldUseDepFile) {
+                runCommand = "run_dep";
+            }
+            file << "build " << command.out.string() << ": " << runCommand
+                 << " ";
 
             if (command.file.src) {
                 file << " " << command.file.src->fullPath.string();

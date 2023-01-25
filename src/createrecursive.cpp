@@ -1,6 +1,7 @@
 #include "createrecursive.h"
 #include "buildpaths.h"
 #include "deps.h"
+#include "log.h"
 #include "luascript.h"
 #include <filesystem>
 #include <iostream>
@@ -121,6 +122,8 @@ File *createPcmFile(Target &target,
         target.addObject(objFile);
     }
 
+    file->shouldUseDepFile = true;
+
     return file;
 }
 
@@ -196,9 +199,11 @@ std::unique_ptr<Target> createRecursive(Index &index, const BuildPaths &paths) {
         findFilesWithoutBuildScript(index, *target);
     }
 
-    std::cout << std::setw(2)
-              << nlohmann::json{{"index", index}, {"target", *target},}
-              << std::endl;
+    mlog.debug(std::setw(2),
+               nlohmann::json{
+                   {"index", index},
+                   {"target", *target},
+               });
 
     return target;
 }

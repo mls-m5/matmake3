@@ -1,4 +1,5 @@
 #include "compilationdatabase.h"
+#include "log.h"
 #include "nlohmann/json.hpp"
 #include <filesystem>
 #include <fstream>
@@ -39,7 +40,7 @@ void writeCompilationDatabase(const BuildPaths &paths,
 
     auto jsonPath = std::filesystem::path{paths.out / "compile_commands.json"};
 
-    std::cout << "writing to file " << jsonPath << std::endl;
+    mlog.debug("writing to file", jsonPath);
 
     {
         auto file = std::ofstream{jsonPath};

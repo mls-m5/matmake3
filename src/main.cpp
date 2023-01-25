@@ -1,12 +1,15 @@
 #include "build.h"
 #include "createrecursive.h"
 #include "index.h"
-// #include "ninja.h"
+#include "log.h"
 #include "settings.h"
 #include <iostream>
 
 int main(int argc, char *argv[]) {
     const auto settings = Settings{argc, argv};
+
+    mlog.enableDebugOutput(settings.isVerbose);
+
     std::ios::sync_with_stdio(false);
 
     auto index = std::make_unique<Index>();

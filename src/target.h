@@ -151,6 +151,7 @@ public:
 
     void name(std::string name) {
         _name = name;
+        _output->name(name);
     }
 
 private:

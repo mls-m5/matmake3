@@ -3,6 +3,7 @@
 #include "buildpaths.h"
 #include "commandlisit.h"
 #include "file.h"
+#include "log.h"
 #include <functional>
 #include <iostream>
 #include <ostream>
@@ -73,7 +74,7 @@ inline void BuildContext::build(File &file) {
         build(*file.src);
     }
 
-    std::cout << "prepare " << file.path.filename() << std::endl;
+    mlog.debug("prepare ", file.path.filename());
 
     auto buildType = file.buildType;
 

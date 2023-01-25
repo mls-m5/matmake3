@@ -3,9 +3,9 @@
 #include "buildpaths.h"
 #include "commandlisit.h"
 #include "compilationdatabase.h"
+#include "log.h"
 #include "ninja.h"
 #include <cstdlib>
-#include <iostream>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
@@ -159,8 +159,7 @@ void build(Target &target, const Settings &settings) {
 
     if (settings.shouldBuildNative) {
         for (auto &command : context.commandList().commands()) {
-            std::cout << "build " << command.file.fullPath.filename()
-                      << std::endl;
+            mlog.debug("build ", command.file.fullPath.filename());
             std::cout << command.command << std::endl;
             if (std::system(command.command.c_str())) {
                 throw std::runtime_error{"failed with command: " +
@@ -188,7 +187,7 @@ void createBuildPaths(const Target &target, BuildContext &context) {
         if (dir.empty()) {
             continue;
         }
-        std::cout << "creating directory " << dir << std::endl;
+        mlog.debug("creating directory", dir);
         std::filesystem::create_directories(dir);
     }
 }
