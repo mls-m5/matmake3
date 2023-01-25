@@ -125,6 +125,17 @@ public:
         _includes.push_back(path);
     }
 
+    std::string flags() const {
+        return _flags;
+    }
+
+    void addFlags(std::string flags) {
+        if (!_flags.empty()) {
+            _flags += " ";
+        }
+        _flags += flags;
+    }
+
     // Files used by this target
     const auto &files() const {
         return _files;
@@ -137,6 +148,7 @@ private:
     std::vector<std::filesystem::path> _includes;
     std::unordered_map<std::string, CreateT> _createFunctions;
     std::string _name = "main";
+    std::string _flags = "";
 
     File *_output = nullptr;
     const BuildPaths &_paths;

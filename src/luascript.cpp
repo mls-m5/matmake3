@@ -50,6 +50,21 @@ void include(Target &target, sol::object path) {
     }
 }
 
+void flags(Target &target, sol::object f) {
+    if (!f) {
+        return;
+    }
+    if (f.is<std::string>()) {
+        auto flags = f.as<std::string>();
+        target.addFlags(flags);
+    }
+    else if (f.is<sol::table>()) {
+        for (auto flag : f.as<sol::table>()) {
+            flags(target, flag.second);
+        }
+    }
+}
+
 } // namespace
 
 bool hasBuildScript(const BuildPaths &paths) {
@@ -63,6 +78,7 @@ void runBuildScript(const BuildPaths &paths,
     lua.set_function("executable", [&target, &index](sol::table value) {
         src(target, index, value.get<sol::object>("src"));
         include(target, value.get<sol::object>("include"));
+        flags(target, value.get<sol::object>("flags"));
     });
 
     auto script = lua.load_file(paths.buildScript);

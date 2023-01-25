@@ -5,5 +5,9 @@ executable{
    },
    include = {
       "include"
+   },
+   flags = {
+      "-DVALUE=20"
    }
 }
+

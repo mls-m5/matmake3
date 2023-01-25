@@ -39,6 +39,10 @@ std::string flags(Target &target) {
     for (auto i : target.includes()) {
         ss << " -I" << i;
     }
+
+    if (!target.flags().empty()) {
+        ss << " " << target.flags();
+    }
     return ss.str();
 }
 
