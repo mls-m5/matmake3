@@ -153,7 +153,9 @@ void build(Target &target, const Settings &settings) {
     createBuildPaths(target, context);
     context.build(*out);
 
-    writeCompilationDatabase(context.paths(), context.commandList());
+    if (settings.shouldOutputCompileCommands) {
+        writeCompilationDatabase(context.paths(), context.commandList());
+    }
 
     if (settings.shouldBuildNative) {
         for (auto &command : context.commandList().commands()) {

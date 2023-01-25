@@ -19,6 +19,7 @@ struct Settings {
     bool shouldBuildNative = false;
     int numCores = -1;
     bool isVerbose = false;
+    bool shouldOutputCompileCommands = false;
 
     Command command = Build;
 
@@ -59,6 +60,9 @@ struct Settings {
             else if (arg == "--clean") {
                 command = Clean;
             }
+            else if (arg == "--compile-commands") {
+                shouldOutputCompileCommands = true;
+            }
             else {
                 std::cerr << "invalid argument " << arg << "\n\n";
                 printHelp(1);
@@ -81,6 +85,7 @@ args
 --file -f                 specify path to .mm3 file to use
 --verbose -v              print information of matmakes process
 --clean                   remove all built files
+--compile-commands        print clang compile commands
 
 
 )_";
