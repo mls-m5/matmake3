@@ -1,6 +1,7 @@
 #include "createrecursive.h"
 #include "buildpaths.h"
 #include "deps.h"
+#include "luascript.h"
 #include <filesystem>
 #include <iostream>
 #include <stdexcept>
@@ -158,19 +159,11 @@ File *createPcmHeaderFile(Target &target,
     return file;
 }
 
-} // namespace
-
-std::unique_ptr<Target> createRecursive(Index &index, const BuildPaths &paths) {
-    auto target = std::make_unique<Target>("main", index, paths);
-
-    target->registerFunction(".o", createObjectFile);
-    target->registerFunction(".pcm", createPcmFile);
-    target->registerFunction(".h.pcm", createPcmHeaderFile);
-
+void findFilesWithoutBuildScript(const Index &index, Target &target) {
     for (auto src : index.findAll(".cpp")) {
         auto objSrc = std::filesystem::path{src->path.string() + ".o"};
-        auto obj = target->requestObject(objSrc, src->path);
-        target->addObject(obj);
+        auto obj = target.requestObject(objSrc, src->path);
+        target.addObject(obj);
     }
 
     {
@@ -180,10 +173,28 @@ std::unique_ptr<Target> createRecursive(Index &index, const BuildPaths &paths) {
                 includes.push_back(std::filesystem::relative(it.path(), "."));
             }
         }
-        target->includes(std::move(includes));
+        target.includes(std::move(includes));
     }
 
-    target->output()->buildType = "exe";
+    target.output()->buildType = "exe";
+}
+
+} // namespace
+
+std::unique_ptr<Target> createRecursive(Index &index, const BuildPaths &paths) {
+    auto target = std::make_unique<Target>("main", index, paths);
+
+    target->registerFunction(".o", createObjectFile);
+    target->registerFunction(".pcm", createPcmFile);
+    target->registerFunction(".h.pcm", createPcmHeaderFile);
+
+    if (hasBuildScript(paths)) {
+        runBuildScript(paths, index, *target);
+    }
+    else {
+        std::cout << "building without build script...\n";
+        findFilesWithoutBuildScript(index, *target);
+    }
 
     std::cout << std::setw(2)
               << nlohmann::json{{"index", index}, {"target", *target},}

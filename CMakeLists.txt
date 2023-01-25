@@ -15,6 +15,7 @@ add_executable(
     src/deps.cpp
     src/build.cpp
     src/compilationdatabase.cpp
+    src/luascript.cpp
     )
 
 target_compile_features(
@@ -44,4 +45,5 @@ target_link_libraries(
     matmake3
     PUBLIC
     nlohmann_json
+    sol2
     )

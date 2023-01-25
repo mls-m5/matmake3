@@ -25,7 +25,7 @@ struct Index {
         }
     }
 
-    File *find(std::filesystem::path path) {
+    File *find(std::filesystem::path path) const {
         for (auto &f : files) {
             if (f->path == path) {
                 return f.get();
@@ -39,7 +39,7 @@ struct Index {
         return nullptr;
     }
 
-    std::vector<File *> findAll(std::string extension) {
+    std::vector<File *> findAll(std::string extension) const {
         auto files = std::vector<File *>{};
         for (auto &f : this->files) {
             if (f->path.extension() == extension) {

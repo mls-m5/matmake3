@@ -41,6 +41,9 @@ struct Settings {
             else if (arg == "--flag") {
                 cxxflags += " " + args.at(++i);
             }
+            else if (arg == "--file" || arg == "-f") {
+                paths.buildScript = args.at(++i);
+            }
             else {
                 std::cerr << "invalid argument " << arg << "\n\n";
                 printHelp(1);
