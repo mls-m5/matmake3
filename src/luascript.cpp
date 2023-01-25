@@ -32,6 +32,24 @@ void src(Target &target, const Index &index, sol::object src) {
     }
 }
 
+void include(Target &target, sol::object path) {
+    if (!path) {
+        return;
+    }
+    if (path.is<std::string>()) {
+        target.addInclude(path.as<std::string>());
+    }
+    else if (path.is<sol::table>()) {
+        sol::table table = path.as<sol::table>();
+        for (auto path : table) {
+            ::include(target, path.second);
+        }
+    }
+    else {
+        throw sol::error{"include is not string or array"};
+    }
+}
+
 } // namespace
 
 bool hasBuildScript(const BuildPaths &paths) {
@@ -44,6 +62,7 @@ void runBuildScript(const BuildPaths &paths,
     auto lua = sol::state{};
     lua.set_function("executable", [&target, &index](sol::table value) {
         src(target, index, value.get<sol::object>("src"));
+        include(target, value.get<sol::object>("include"));
     });
 
     auto script = lua.load_file(paths.buildScript);

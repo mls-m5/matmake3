@@ -1,7 +1,7 @@
 
 executable{
    src = {
-      "src/*.cpp"
+      "src/*.cpp",
    },
    include = {
       "include"

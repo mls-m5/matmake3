@@ -121,6 +121,10 @@ public:
         return _includes;
     }
 
+    void addInclude(std::filesystem::path path) {
+        _includes.push_back(path);
+    }
+
     // Files used by this target
     const auto &files() const {
         return _files;

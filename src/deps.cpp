@@ -53,17 +53,6 @@ std::vector<std::string> parseModuleDeps(std::filesystem::path path) {
             deps.push_back(dep);
             continue;
         }
-        //        if (line.rfind(exportImportStr, 0) == 0) {
-        //            auto dep = line.substr(exportImportStr.size());
-        //            if (dep.empty()) {
-        //                continue;
-        //            }
-        //            if (dep.back() == ';') {
-        //                dep.pop_back();
-        //            }
-        //            deps.push_back(dep);
-        //            continue;
-        //        }
     }
 
     return deps;
