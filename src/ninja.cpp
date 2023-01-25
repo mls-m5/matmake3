@@ -47,7 +47,7 @@ void writeNinjaFile(const BuildPaths &paths, const CommandList &list) {
         file << "  depfile = $out.d\n\n";
 
         for (auto &command : list.commands()) {
-            file << "build " << command.out.string() << ": run";
+            file << "build " << command.out.string() << ": run ";
 
             if (command.file.src) {
                 file << " " << command.file.src->fullPath.string();
