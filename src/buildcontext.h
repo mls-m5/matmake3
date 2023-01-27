@@ -17,7 +17,7 @@ using BuildFMap =
     std::unordered_map<std::string,
                        std::function<void(BuildContext &, File &)>>;
 
-// Rules how to build each file
+// Rules how to build each file, including dependencies
 // Might be replaced by some json template magick later
 struct BuildContext {
     BuildContext(BuildFMap map, const BuildPaths &paths)

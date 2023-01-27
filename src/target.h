@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <vector>
 
-// Target is a single file context, like a executable or library
+/// Target is a single linked file context, like a executable or library
 class Target {
 public:
     Target(const Target &) = delete;

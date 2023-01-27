@@ -35,7 +35,6 @@ File *createRegularObjectFile(Target &target,
 
     auto file = target.createIntermediateFile(path);
     for (auto &dep : deps) {
-        //        auto module = dep + ".pcm";
         file->dependencies.push_back(requestPcm(target, dep));
     }
 
@@ -169,14 +168,10 @@ void findFilesWithoutBuildScript(const Index &index, Target &target) {
         target.addObject(obj);
     }
 
-    {
-        auto includes = std::vector<std::filesystem::path>{};
-        for (auto &it : std::filesystem::recursive_directory_iterator{"."}) {
-            if (it.path().filename() == "include") {
-                includes.push_back(std::filesystem::relative(it.path(), "."));
-            }
+    for (auto &it : std::filesystem::recursive_directory_iterator{"."}) {
+        if (it.path().filename() == "include") {
+            target.addInclude(std::filesystem::relative(it.path(), "."));
         }
-        target.includes(std::move(includes));
     }
 
     target.output()->buildType = "exe";

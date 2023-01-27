@@ -5,6 +5,7 @@
 #include <ostream>
 #include <vector>
 
+// representation of a file that could be included in the project
 struct File {
     ~File() = default;
     File(std::filesystem::path p, std::filesystem::path fullPath)

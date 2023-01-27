@@ -10,7 +10,6 @@ add_executable(
     src/ninja.cpp
     src/filter.cpp
     src/glob.cpp
-    src/matmakelua.cpp
     src/createrecursive.cpp
     src/deps.cpp
     src/build.cpp

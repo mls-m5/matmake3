@@ -9,6 +9,8 @@
 #include <unordered_set>
 #include <vector>
 
+//! Summary of all files that could be related to the project in the current
+//! folder
 struct Index {
     std::vector<std::unique_ptr<File>> files;
 
